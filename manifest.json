@@ -1,0 +1,21 @@
+{
+  "name": "Estamos Contigo — Plataforma de Gestión de Casos",
+  "short_name": "Estamos Contigo",
+  "description": "Gestión de casos del Componente N°1 Primera Respuesta — Atención a Víctimas de Delitos Violentos. Gobierno Regional Metropolitano de Santiago.",
+  "lang": "es-CL",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f9f9f7",
+  "theme_color": "#0d366b",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["government", "productivity"],
+  "shortcuts": [
+    { "name": "Ingresar caso", "url": "./index.html#nuevo", "description": "Registro rápido de un nuevo caso" },
+    { "name": "Alertas", "url": "./index.html#alertas", "description": "Alertas de gestión, criticidad y seguimiento" }
+  ]
+}

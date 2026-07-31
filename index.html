@@ -1,0 +1,2239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Plataforma de gestión de casos — Programa Estamos Contigo, Defensoría a Víctimas de Delitos Violentos, Gobierno Regional Metropolitano de Santiago">
+<meta name="theme-color" content="#0e3a6b">
+<title>Estamos Contigo · Plataforma de Gestión de Casos</title>
+<style>
+/* ============================================================
+   TOKENS — paleta validada (light/dark)
+   ============================================================ */
+:root{
+  color-scheme: light;
+  --surface-1:#fcfcfb; --page:#f9f9f7;
+  --ink-1:#0b0b0b; --ink-2:#52514e; --ink-3:#898781;
+  --grid:#e1e0d9; --axisline:#c3c2b7;
+  --border:rgba(11,11,11,.10); --border-strong:rgba(11,11,11,.16);
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#e34948;
+  --seq-100:#cde2fb; --seq-150:#b7d3f6; --seq-200:#9ec5f4; --seq-250:#86b6ef; --seq-300:#6da7ec; --seq-350:#5598e7;
+  --seq-400:#3987e5; --seq-450:#2a78d6; --seq-500:#256abf; --seq-550:#1c5cab; --seq-600:#184f95; --seq-650:#104281; --seq-700:#0d366b;
+  --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
+  --good-text:#006300;
+  --brand:#0d366b; --brand-2:#1c5cab;
+  --wash:#f0efec;
+  --shadow:0 1px 2px rgba(11,11,11,.05),0 4px 14px rgba(11,11,11,.06);
+  --shadow-lg:0 4px 10px rgba(11,11,11,.08),0 14px 40px rgba(11,11,11,.14);
+  --radius:12px;
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme: dark;
+    --surface-1:#1a1a19; --page:#0d0d0d;
+    --ink-1:#ffffff; --ink-2:#c3c2b7; --ink-3:#898781;
+    --grid:#2c2c2a; --axisline:#383835;
+    --border:rgba(255,255,255,.10); --border-strong:rgba(255,255,255,.18);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+    --good-text:#0ca30c;
+    --brand:#9ec5f4; --brand-2:#86b6ef;
+    --wash:#232322;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.35);
+    --shadow-lg:0 4px 10px rgba(0,0,0,.5),0 14px 40px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --surface-1:#1a1a19; --page:#0d0d0d;
+  --ink-1:#ffffff; --ink-2:#c3c2b7; --ink-3:#898781;
+  --grid:#2c2c2a; --axisline:#383835;
+  --border:rgba(255,255,255,.10); --border-strong:rgba(255,255,255,.18);
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+  --good-text:#0ca30c;
+  --brand:#9ec5f4; --brand-2:#86b6ef;
+  --wash:#232322;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.35);
+  --shadow-lg:0 4px 10px rgba(0,0,0,.5),0 14px 40px rgba(0,0,0,.5);
+}
+
+*{box-sizing:border-box; margin:0; padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:var(--page); color:var(--ink-1);
+  font-size:14.5px; line-height:1.45;
+  min-height:100vh;
+}
+button{font:inherit; cursor:pointer; color:inherit; background:none; border:none}
+input,select,textarea{font:inherit; color:var(--ink-1)}
+a{color:var(--brand-2); text-decoration:none}
+:focus-visible{outline:2px solid var(--s1); outline-offset:2px; border-radius:4px}
+::placeholder{color:var(--ink-3)}
+svg text{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+#login-screen{
+  min-height:100vh; display:flex; align-items:stretch;
+}
+.login-hero{
+  flex:1.05; background:linear-gradient(160deg,#0d366b 0%,#1c5cab 55%,#256abf 100%);
+  color:#fff; padding:56px; display:flex; flex-direction:column; justify-content:space-between;
+  position:relative; overflow:hidden;
+}
+.login-hero::after{
+  content:""; position:absolute; right:-120px; bottom:-120px; width:420px; height:420px;
+  border-radius:50%; background:rgba(255,255,255,.06);
+}
+.login-hero::before{
+  content:""; position:absolute; right:40px; bottom:60px; width:220px; height:220px;
+  border-radius:50%; background:rgba(255,255,255,.05);
+}
+.gore-tag{display:flex; align-items:center; gap:12px; font-size:13px; letter-spacing:.4px; opacity:.92}
+.gore-tag .crest{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.14);display:grid;place-items:center;font-weight:700;font-size:12px;letter-spacing:0}
+.login-hero h1{font-size:clamp(28px,3.6vw,44px); line-height:1.12; font-weight:700; max-width:520px; margin-top:18px}
+.login-hero .sub{margin-top:14px; font-size:15.5px; opacity:.85; max-width:480px}
+.hero-feats{display:flex; flex-direction:column; gap:10px; font-size:13.5px; position:relative; z-index:1}
+.hero-feats div{display:flex; gap:10px; align-items:center; opacity:.9}
+.hero-feats svg{flex:none}
+.login-panel{
+  flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;
+  padding:48px 32px; gap:6px;
+}
+.login-card{width:min(430px,100%)}
+.login-card h2{font-size:22px; margin-bottom:4px}
+.login-card>p{color:var(--ink-2); margin-bottom:22px}
+.role-cards{display:flex; flex-direction:column; gap:10px; margin-bottom:20px}
+.role-card{
+  display:flex; align-items:center; gap:14px; text-align:left; width:100%;
+  background:var(--surface-1); border:1px solid var(--border); border-radius:var(--radius);
+  padding:13px 16px; transition:border-color .15s, box-shadow .15s, transform .05s;
+}
+.role-card:hover{border-color:var(--s1); box-shadow:var(--shadow)}
+.role-card[aria-pressed="true"]{border-color:var(--s1); box-shadow:0 0 0 1px var(--s1) inset, var(--shadow)}
+.role-card .avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;flex:none;font-size:15px}
+.role-card .rc-name{font-weight:600}
+.role-card .rc-role{font-size:12.5px;color:var(--ink-2)}
+.role-card .rc-scope{font-size:11.5px;color:var(--ink-3);margin-top:1px}
+.field{margin-bottom:14px}
+.field label{display:block; font-size:12.5px; font-weight:600; color:var(--ink-2); margin-bottom:5px}
+.field input,.field select,.field textarea{
+  width:100%; padding:9px 12px; border:1px solid var(--border-strong); border-radius:9px;
+  background:var(--surface-1);
+}
+.field input:hover,.field select:hover,.field textarea:hover{border-color:var(--ink-3)}
+.req::after{content:" *"; color:var(--critical); font-weight:700}
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:10px 18px; border-radius:9px; font-weight:600; border:1px solid transparent;
+  transition:filter .15s, background .15s;
+}
+.btn-primary{background:var(--seq-550); color:#fff}
+:root[data-theme="dark"] .btn-primary, :root:where(:not([data-theme="light"])) .btn-primary{background:var(--seq-500)}
+.btn-primary:hover{filter:brightness(1.12)}
+.btn-secondary{background:var(--surface-1); border-color:var(--border-strong)}
+.btn-secondary:hover{background:var(--wash)}
+.btn-ghost{color:var(--ink-2); padding:8px 12px}
+.btn-ghost:hover{background:var(--wash); color:var(--ink-1)}
+.btn-danger{background:var(--critical); color:#fff}
+.btn-block{width:100%}
+.btn:disabled{opacity:.5; cursor:not-allowed}
+.login-foot{margin-top:26px; font-size:12px; color:var(--ink-3); text-align:center; line-height:1.6}
+
+/* ============================================================
+   APP SHELL
+   ============================================================ */
+#app{display:none; min-height:100vh}
+#app.on{display:grid; grid-template-columns:246px 1fr}
+.sidebar{
+  background:var(--surface-1); border-right:1px solid var(--border);
+  padding:18px 12px; display:flex; flex-direction:column; gap:2px;
+  position:sticky; top:0; height:100vh; overflow-y:auto; z-index:30;
+}
+.side-brand{display:flex; gap:10px; align-items:center; padding:4px 10px 16px}
+.side-brand .crest{width:36px;height:36px;border-radius:9px;background:linear-gradient(150deg,var(--seq-550),var(--seq-400));color:#fff;display:grid;place-items:center;font-weight:800;font-size:11px}
+.side-brand b{font-size:14.5px; display:block; line-height:1.15}
+.side-brand span{font-size:10.5px; color:var(--ink-3); letter-spacing:.3px}
+.nav-sec{font-size:10.5px; font-weight:700; letter-spacing:.8px; color:var(--ink-3); padding:14px 12px 5px; text-transform:uppercase}
+.nav-item{
+  display:flex; align-items:center; gap:11px; padding:8.5px 12px; border-radius:9px;
+  color:var(--ink-2); font-weight:500; font-size:13.5px; width:100%; text-align:left; position:relative;
+}
+.nav-item:hover{background:var(--wash); color:var(--ink-1)}
+.nav-item.active{background:var(--wash); color:var(--brand); font-weight:650}
+.nav-item.active::before{content:""; position:absolute; left:-12px; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0; background:var(--seq-450)}
+.nav-item svg{flex:none; opacity:.85}
+.nav-badge{margin-left:auto; background:var(--critical); color:#fff; font-size:10.5px; font-weight:700; border-radius:99px; padding:1px 7px}
+.side-user{margin-top:auto; border-top:1px solid var(--border); padding-top:12px; display:flex; align-items:center; gap:10px; padding-left:8px}
+.side-user .avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:13px;flex:none}
+.side-user b{font-size:13px; display:block; line-height:1.2}
+.side-user span{font-size:11px; color:var(--ink-3)}
+
+.main{display:flex; flex-direction:column; min-width:0}
+.topbar{
+  display:flex; align-items:center; gap:14px; padding:12px 26px;
+  background:var(--surface-1); border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:25;
+}
+.hamburger{display:none}
+.searchbox{position:relative; flex:1; max-width:430px}
+.searchbox input{width:100%; padding:8.5px 12px 8.5px 36px; border-radius:99px; border:1px solid var(--border-strong); background:var(--page)}
+.searchbox svg{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--ink-3)}
+.search-results{
+  position:absolute; top:calc(100% + 6px); left:0; right:0; background:var(--surface-1);
+  border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow-lg); overflow:hidden; display:none; max-height:340px; overflow-y:auto;
+}
+.search-results.on{display:block}
+.sr-item{display:block; width:100%; text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); font-size:13px}
+.sr-item:hover{background:var(--wash)}
+.sr-item b{display:block}
+.sr-item span{color:var(--ink-2); font-size:12px}
+.topbar-right{margin-left:auto; display:flex; align-items:center; gap:6px}
+.conn-pill{
+  display:flex; align-items:center; gap:7px; font-size:12px; font-weight:600;
+  padding:5px 12px; border-radius:99px; border:1px solid var(--border);
+}
+.conn-pill .dot{width:8px;height:8px;border-radius:50%;background:var(--good)}
+.conn-pill.off .dot{background:var(--warning)}
+.conn-pill .sync-n{background:var(--warning); color:#4a3400; border-radius:99px; padding:0 6px; font-size:11px; font-weight:800}
+.icon-btn{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;color:var(--ink-2);position:relative}
+.icon-btn:hover{background:var(--wash); color:var(--ink-1)}
+.icon-btn .bubble{position:absolute; top:5px; right:5px; min-width:16px; height:16px; padding:0 4px; background:var(--critical); border-radius:99px; color:#fff; font-size:10px; font-weight:800; display:grid; place-items:center; border:2px solid var(--surface-1)}
+
+.content{padding:24px 26px 60px; max-width:1440px; width:100%; margin:0 auto}
+.page-head{display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap; margin-bottom:20px}
+.page-head h2{font-size:21px; letter-spacing:-.2px}
+.page-head .pg-sub{color:var(--ink-2); font-size:13px; margin-top:3px}
+.page-head .actions{margin-left:auto; display:flex; gap:9px; flex-wrap:wrap}
+
+/* ============================================================
+   COMPONENTES
+   ============================================================ */
+.card{background:var(--surface-1); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow)}
+.card-pad{padding:18px 20px}
+.card h3{font-size:14.5px; margin-bottom:2px}
+.card .card-sub{font-size:12px; color:var(--ink-3); margin-bottom:12px}
+.grid{display:grid; gap:16px}
+.g-4{grid-template-columns:repeat(4,1fr)}
+.g-3{grid-template-columns:repeat(3,1fr)}
+.g-2{grid-template-columns:repeat(2,1fr)}
+.g-2-1{grid-template-columns:2fr 1fr}
+.g-1-2{grid-template-columns:1fr 2fr}
+@media(max-width:1120px){.g-4{grid-template-columns:repeat(2,1fr)} .g-3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.g-4,.g-3,.g-2,.g-2-1,.g-1-2{grid-template-columns:1fr}}
+
+.stat-tile{padding:16px 18px; display:flex; flex-direction:column; gap:2px}
+.stat-tile .st-label{font-size:12.5px; color:var(--ink-2); font-weight:600}
+.stat-tile .st-value{font-size:30px; font-weight:650; letter-spacing:-.5px; line-height:1.1; margin-top:2px}
+.stat-tile .st-delta{font-size:12px; font-weight:600; display:flex; gap:5px; align-items:center; margin-top:3px; color:var(--ink-2)}
+.stat-tile .up{color:var(--good-text)} .stat-tile .down{color:var(--critical)}
+.stat-tile .st-foot{font-size:11.5px; color:var(--ink-3); margin-top:2px}
+
+.chip{display:inline-flex; align-items:center; gap:6px; padding:2.5px 10px; border-radius:99px; font-size:11.5px; font-weight:650; border:1px solid transparent; white-space:nowrap}
+.chip .cdot{width:7px;height:7px;border-radius:50%}
+.chip-outline{border-color:var(--border-strong); color:var(--ink-2); background:var(--surface-1)}
+
+table.dt{width:100%; border-collapse:collapse; font-size:13px}
+.dt th{
+  text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.6px;
+  color:var(--ink-3); font-weight:700; padding:9px 12px; border-bottom:1px solid var(--grid); white-space:nowrap;
+}
+.dt td{padding:10px 12px; border-bottom:1px solid var(--grid); vertical-align:middle}
+.dt tbody tr{transition:background .1s}
+.dt tbody tr:hover{background:var(--wash)}
+.dt tbody tr.rowlink{cursor:pointer}
+.dt .num{text-align:right; font-variant-numeric:tabular-nums}
+.dt td .td-main{font-weight:600}
+.dt td .td-sub{font-size:11.5px; color:var(--ink-3)}
+.table-scroll{overflow-x:auto}
+
+.filters-row{display:flex; gap:9px; flex-wrap:wrap; align-items:center; margin-bottom:14px}
+.filters-row select,.filters-row input{
+  padding:7.5px 11px; border:1px solid var(--border-strong); border-radius:9px; background:var(--surface-1); font-size:13px;
+}
+.filters-row .spacer{flex:1}
+.count-note{font-size:12px; color:var(--ink-3)}
+
+.empty{padding:38px 20px; text-align:center; color:var(--ink-3)}
+.empty b{display:block; color:var(--ink-2); font-size:14.5px; margin-bottom:4px}
+
+.toast-zone{position:fixed; bottom:20px; right:20px; z-index:200; display:flex; flex-direction:column; gap:9px; max-width:360px}
+.toast{
+  background:var(--surface-1); border:1px solid var(--border); border-left:4px solid var(--good);
+  border-radius:10px; box-shadow:var(--shadow-lg); padding:12px 16px; font-size:13px;
+  animation:slidein .25s ease;
+}
+.toast.warn{border-left-color:var(--warning)} .toast.err{border-left-color:var(--critical)} .toast.info{border-left-color:var(--s1)}
+.toast b{display:block; margin-bottom:1px}
+.toast span{color:var(--ink-2); font-size:12.5px}
+@keyframes slidein{from{transform:translateX(30px); opacity:0} to{transform:none; opacity:1}}
+
+.modal-back{
+  position:fixed; inset:0; background:rgba(8,10,14,.5); z-index:100;
+  display:none; align-items:flex-start; justify-content:center; padding:4vh 16px; overflow-y:auto;
+  backdrop-filter:blur(2px);
+}
+.modal-back.on{display:flex}
+.modal{
+  background:var(--surface-1); border-radius:16px; box-shadow:var(--shadow-lg);
+  width:min(760px,100%); animation:pop .18s ease; border:1px solid var(--border);
+}
+.modal.sm{width:min(480px,100%)} .modal.lg{width:min(980px,100%)}
+@keyframes pop{from{transform:translateY(14px); opacity:0} to{transform:none; opacity:1}}
+.modal-head{display:flex; align-items:center; gap:12px; padding:18px 22px 0}
+.modal-head h3{font-size:17px}
+.modal-head .x{margin-left:auto}
+.modal-body{padding:16px 22px 22px}
+.modal-foot{display:flex; gap:10px; justify-content:flex-end; padding:0 22px 20px}
+
+.tabs{display:flex; gap:2px; border-bottom:1px solid var(--grid); margin-bottom:16px; overflow-x:auto}
+.tab{padding:9px 15px; font-weight:600; font-size:13px; color:var(--ink-2); border-bottom:2px solid transparent; white-space:nowrap}
+.tab:hover{color:var(--ink-1)}
+.tab.active{color:var(--brand); border-bottom-color:var(--seq-450)}
+
+.form-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px 16px}
+.form-grid .full{grid-column:1/-1}
+@media(max-width:640px){.form-grid{grid-template-columns:1fr}}
+fieldset.fs{border:1px solid var(--border); border-radius:12px; padding:14px 16px 16px; margin-bottom:14px}
+fieldset.fs legend{font-size:12px; font-weight:750; color:var(--brand); padding:0 7px; letter-spacing:.4px; text-transform:uppercase}
+.check-row{display:flex; flex-wrap:wrap; gap:8px}
+.checkbox-pill{position:relative}
+.checkbox-pill input{position:absolute; opacity:0; inset:0; cursor:pointer}
+.checkbox-pill span{
+  display:inline-block; padding:6px 13px; border-radius:99px; border:1px solid var(--border-strong);
+  font-size:12.5px; font-weight:550; color:var(--ink-2); transition:.12s;
+}
+.checkbox-pill input:checked + span{background:var(--seq-550); border-color:var(--seq-550); color:#fff}
+.checkbox-pill input:focus-visible + span{outline:2px solid var(--s1); outline-offset:2px}
+.hint{font-size:11.5px; color:var(--ink-3); margin-top:4px}
+.err-text{font-size:12px; color:var(--critical); font-weight:600; margin-top:4px}
+.invalid input,.invalid select,.invalid textarea{border-color:var(--critical)}
+
+.steps{display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap}
+.step-pill{display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; color:var(--ink-3); padding:5px 11px; border-radius:99px; background:var(--wash)}
+.step-pill .n{width:19px;height:19px;border-radius:50%;background:var(--axisline);color:var(--surface-1);display:grid;place-items:center;font-size:11px;font-weight:800}
+.step-pill.cur{color:var(--brand); background:color-mix(in srgb, var(--seq-450) 12%, transparent)}
+.step-pill.cur .n{background:var(--seq-500); color:#fff}
+.step-pill.done .n{background:var(--good)}
+
+.timeline{position:relative; padding-left:26px}
+.timeline::before{content:""; position:absolute; left:8px; top:6px; bottom:6px; width:2px; background:var(--grid); border-radius:2px}
+.tl-item{position:relative; padding-bottom:16px}
+.tl-item::before{content:""; position:absolute; left:-24px; top:4px; width:12px; height:12px; border-radius:50%; background:var(--seq-450); border:2.5px solid var(--surface-1); box-shadow:0 0 0 1px var(--grid)}
+.tl-item .tl-title{font-weight:650; font-size:13px}
+.tl-item .tl-meta{font-size:11.5px; color:var(--ink-3)}
+.tl-item .tl-body{font-size:12.5px; color:var(--ink-2); margin-top:3px}
+
+.alert-item{display:flex; gap:13px; padding:13px 16px; border-bottom:1px solid var(--grid); align-items:flex-start}
+.alert-item:last-child{border-bottom:none}
+.alert-item .ai-ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none}
+.alert-item .ai-t{font-weight:650; font-size:13.5px}
+.alert-item .ai-d{font-size:12.5px; color:var(--ink-2); margin-top:1px}
+.alert-item .ai-meta{font-size:11.5px; color:var(--ink-3); margin-top:3px}
+.alert-item .ai-act{margin-left:auto; flex:none}
+
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--ink-2); margin-top:10px}
+.legend .li{display:flex; gap:6px; align-items:center}
+.legend .sw{width:10px; height:10px; border-radius:3px}
+.legend .swl{width:14px; height:3px; border-radius:2px}
+
+.viz-tooltip{
+  position:fixed; z-index:150; pointer-events:none; background:var(--ink-1); color:var(--page);
+  font-size:12px; padding:7px 11px; border-radius:8px; box-shadow:var(--shadow-lg);
+  opacity:0; transition:opacity .08s; max-width:260px;
+}
+.viz-tooltip b{display:block; font-size:11px; opacity:.75; font-weight:600}
+.viz-tooltip .tt-row{display:flex; align-items:center; gap:7px; margin-top:2px}
+.viz-tooltip .sw{width:8px;height:8px;border-radius:2px}
+
+.heat-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(118px,1fr)); gap:8px}
+.heat-cell{border-radius:10px; padding:10px 11px; min-height:64px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; transition:transform .1s, box-shadow .1s; border:1px solid var(--border)}
+.heat-cell:hover{transform:translateY(-2px); box-shadow:var(--shadow)}
+.heat-cell .hc-name{font-size:11.5px; font-weight:650; line-height:1.2}
+.heat-cell .hc-val{font-size:19px; font-weight:700; font-variant-numeric:tabular-nums}
+.heat-scale{display:flex; align-items:center; gap:8px; font-size:11px; color:var(--ink-3); margin-top:12px}
+.heat-scale .ramp{flex:1; max-width:220px; height:10px; border-radius:5px; background:linear-gradient(90deg,var(--seq-100),var(--seq-400),var(--seq-700))}
+
+.progressbar{height:8px; border-radius:99px; background:var(--seq-100); overflow:hidden; position:relative}
+:root[data-theme="dark"] .progressbar, :root:where(:not([data-theme="light"])) .progressbar{background:var(--seq-700)}
+.progressbar>div{height:100%; border-radius:99px; background:var(--seq-450)}
+
+.kv{display:grid; grid-template-columns:150px 1fr; gap:7px 14px; font-size:13px}
+.kv dt{color:var(--ink-3); font-weight:550} .kv dd{font-weight:550}
+.banner{display:flex; gap:12px; padding:13px 16px; border-radius:12px; font-size:13px; align-items:flex-start; margin-bottom:16px; border:1px solid}
+.banner.info{background:color-mix(in srgb,var(--s1) 8%,var(--surface-1)); border-color:color-mix(in srgb,var(--s1) 30%,transparent)}
+.banner.warn{background:color-mix(in srgb,var(--warning) 10%,var(--surface-1)); border-color:color-mix(in srgb,var(--warning) 35%,transparent)}
+.banner.crit{background:color-mix(in srgb,var(--critical) 8%,var(--surface-1)); border-color:color-mix(in srgb,var(--critical) 30%,transparent)}
+.banner b{display:block}
+.banner span{color:var(--ink-2); font-size:12.5px}
+
+.help-article h3{margin:20px 0 6px; font-size:15px}
+.help-article p, .help-article li{color:var(--ink-2); font-size:13.5px; margin-bottom:6px}
+.help-article ul,.help-article ol{padding-left:22px; margin-bottom:10px}
+.help-article code{background:var(--wash); border-radius:5px; padding:1px 6px; font-size:12px}
+
+.dropzone{border:2px dashed var(--border-strong); border-radius:14px; padding:34px 20px; text-align:center; color:var(--ink-2); transition:.15s; cursor:pointer}
+.dropzone:hover,.dropzone.over{border-color:var(--s1); background:color-mix(in srgb,var(--s1) 5%,transparent)}
+.dropzone b{display:block; color:var(--ink-1); margin-bottom:3px}
+.dropzone .hint{margin-top:6px}
+
+@media(max-width:960px){
+  #app.on{grid-template-columns:1fr}
+  .sidebar{position:fixed; left:0; top:0; bottom:0; width:262px; transform:translateX(-105%); transition:transform .2s ease; box-shadow:var(--shadow-lg); height:100dvh}
+  .sidebar.open{transform:none}
+  .hamburger{display:grid}
+  .content{padding:18px 14px 60px}
+  .login-hero{display:none}
+}
+.scrim{position:fixed; inset:0; background:rgba(8,10,14,.4); z-index:29; display:none}
+.scrim.on{display:block}
+
+/* Impresión: reporte mensual como PDF */
+@media print{
+  body{background:#fff}
+  .sidebar,.topbar,.page-head .actions,.filters-row,.toast-zone,.no-print{display:none !important}
+  #app.on{grid-template-columns:1fr}
+  .content{padding:0; max-width:none}
+  .card{box-shadow:none; break-inside:avoid}
+  .print-only{display:block !important}
+}
+.print-only{display:none}
+</style>
+</head>
+<body>
+
+<div id="login-screen"></div>
+<div id="app"></div>
+<div class="toast-zone" id="toast-zone"></div>
+<div class="viz-tooltip" id="viz-tooltip" role="status"></div>
+<div class="scrim" id="scrim"></div>
+
+<script>
+"use strict";
+/* ============================================================================
+   PLATAFORMA "ESTAMOS CONTIGO" — Gestión de casos, Componente N°1
+   Primera Respuesta · Atención a Víctimas de Delitos Violentos
+   Gobierno Regional Metropolitano de Santiago — Licitación 1261-XX-LP26
+   ----------------------------------------------------------------------------
+   Prototipo funcional (demo). Los datos son ficticios y viven en memoria.
+   En producción: backend de servicios (API RESTful), BD relacional cifrada,
+   autenticación institucional y sincronización offline con service worker.
+   ============================================================================ */
+
+/* ==================== UTILIDADES ==================== */
+const $  = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtN = n => new Intl.NumberFormat("es-CL").format(n);
+const pct = (a,b) => b ? Math.round(a/b*100) : 0;
+const DAY = 864e5;
+const hoy = () => new Date();
+function fdate(d, withTime=false){
+  if(!d) return "—";
+  const x = (d instanceof Date) ? d : new Date(d);
+  const f = x.toLocaleDateString("es-CL",{day:"2-digit",month:"2-digit",year:"numeric"});
+  return withTime ? f + " " + x.toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"}) : f;
+}
+function fmes(d){ const x=(d instanceof Date)?d:new Date(d); return x.toLocaleDateString("es-CL",{month:"long",year:"numeric"}); }
+const diasEntre = (a,b) => Math.floor(((b instanceof Date?b:new Date(b)) - (a instanceof Date?a:new Date(a)))/DAY);
+const cap = s => s ? s.charAt(0).toUpperCase()+s.slice(1) : s;
+
+/* RNG determinista para datos demo estables */
+function mulberry32(seed){ return function(){ let t = seed += 0x6D2B79F5; t = Math.imul(t ^ t>>>15, t | 1); t ^= t + Math.imul(t ^ t>>>7, t | 61); return ((t ^ t>>>14) >>> 0) / 4294967296; }; }
+const rng = mulberry32(20260731);
+const pick = arr => arr[Math.floor(rng()*arr.length)];
+const rint = (a,b) => a + Math.floor(rng()*(b-a+1));
+
+/* RUT chileno con dígito verificador válido */
+function dvRut(num){ let M=0,S=1; for(;num;num=Math.floor(num/10)) S=(S+num%10*(9-M++%6))%11; return S ? String(S-1) : "K"; }
+function rutDemo(){ const n = rint(9_000_000, 26_500_000); return fmtN(n)+"-"+dvRut(n); }
+function normRut(r){ return String(r||"").replace(/[.\s]/g,"").toUpperCase(); }
+function validaRut(r){
+  const m = normRut(r).match(/^(\d{6,9})-?([\dK])$/); if(!m) return false;
+  return dvRut(parseInt(m[1],10)) === m[2];
+}
+
+/* ==================== CATÁLOGOS (según Bases Técnicas) ==================== */
+const COMUNAS = ["Santiago","Puente Alto","Maipú","La Florida","San Bernardo","Pudahuel","Quilicura","Peñalolén","La Pintana","El Bosque","Renca","Recoleta","Conchalí","Cerro Navia","Lo Espejo","Estación Central","Pedro Aguirre Cerda","San Ramón","La Granja","Lo Prado","Quinta Normal","Independencia","San Joaquín","San Miguel","Macul","Huechuraba","Cerrillos","La Cisterna","Lampa","Colina","Padre Hurtado","Peñaflor","Melipilla","Talagante","Buin","Paine"];
+
+const DELITOS = [
+  {id:"robo_violencia",    n:"Robo con violencia",      peso:3},
+  {id:"robo_intimidacion", n:"Robo con intimidación",   peso:3},
+  {id:"homicidio",         n:"Homicidio (familiar directo)", peso:5},
+  {id:"homicidio_frustrado",n:"Homicidio frustrado",    peso:5},
+  {id:"lesiones_graves",   n:"Lesiones graves",         peso:4},
+  {id:"secuestro",         n:"Secuestro / retención",   peso:5},
+  {id:"balacera",          n:"Víctima de balacera",     peso:4},
+  {id:"otro",              n:"Otro delito violento",    peso:2},
+];
+const GRUPOS_PRIORITARIOS = [
+  {id:"discapacidad", n:"Persona con discapacidad"},
+  {id:"migrante",     n:"Persona migrante"},
+  {id:"pueblo_orig",  n:"Pueblo originario"},
+  {id:"sit_calle",    n:"Situación de calle"},
+  {id:"diversidad",   n:"Diversidad sexogenérica"},
+  {id:"nna",          n:"NNA en el hogar"},
+  {id:"adulto_mayor", n:"Persona mayor (60+)"},
+];
+const SIT_PRIORIZACION = [
+  {id:"riesgo_vital",  n:"Riesgo vital vigente",            pts:4},
+  {id:"reiterada",     n:"Victimización reiterada",          pts:3},
+  {id:"agresor_conocido",n:"Agresor conocido / cercano",     pts:3},
+  {id:"sin_red",       n:"Sin red de apoyo",                 pts:2},
+  {id:"crisis_aguda",  n:"Crisis emocional aguda (triage)",  pts:4},
+  {id:"perdida_sustento",n:"Pérdida de sustento económico",  pts:2},
+];
+const CANALES = ["Carabineros de Chile","PDI","Fiscalía (URAVIT)","Municipio","Salud (SAPU/Hospital)","Demanda espontánea","Línea del programa"];
+const ESTADOS = [
+  {id:"derivado",   n:"Derivado al programa", color:"var(--s7)",  tono:"#4a3aa7"},
+  {id:"ingresado",  n:"Ingresado",            color:"var(--s1)",  tono:"#2a78d6"},
+  {id:"atencion",   n:"En atención",          color:"var(--s2)",  tono:"#eb6834"},
+  {id:"seguimiento",n:"En seguimiento",       color:"var(--s4)",  tono:"#eda100"},
+  {id:"cerrado",    n:"Cerrado",              color:"var(--s6)",  tono:"#008300"},
+  {id:"egreso_adm", n:"Egreso administrativo",color:"var(--ink-3)",tono:"#898781"},
+  {id:"brecha",     n:"Brechas",              color:"var(--s8)",  tono:"#e34948"},
+  {id:"reingreso",  n:"Reingreso",            color:"var(--s5)",  tono:"#e87ba4"},
+];
+const EGRESOS = [
+  {id:1, n:"Derivación efectiva a servicios especializados", encuesta:true},
+  {id:2, n:"Cumplimiento del plan con cierre técnico validado por la triada", encuesta:true},
+  {id:3, n:"Egreso voluntario (la víctima decide no continuar)", encuesta:true},
+  {id:4, n:"Egreso administrativo (pérdida de contacto documentada)", encuesta:false},
+];
+const INSTITUCIONES = ["CAJ Metropolitana","CAVD (SPD)","URAVIT Fiscalía","CESFAM / Salud Mental","SENDA Previene","SernamEG","Mejor Niñez","COSAM","Municipio · DIDECO","Hospital de referencia"];
+const TIPOS_INTERVENCION = ["Contención emocional","Primeros auxilios psicológicos","Orientación jurídica","Acompañamiento a diligencias","Activación de red local","Visita domiciliaria","Atención psicosocial breve","Patrocinio / derivación jurídica"];
+const ESTANDAR_PRIMERA_ATENCION_HRS = 72;   // estándar de atención: 1ª atención ≤ 72 h desde derivación
+const DIAS_SIN_ACTUALIZAR = 15;             // alerta caso sin actualización
+const META_MENSUAL = 2064;                  // 24.772 víctimas/año ÷ 12 (dimensionamiento bases)
+
+/* ==================== EQUIPOS Y USUARIOS DEL SISTEMA ==================== */
+const TRIADAS = Array.from({length:17},(_,i)=>{
+  const comunas = COMUNAS.slice((i*36/17|0), ((i+1)*36/17|0)+ (i===16?0:1)).slice(0,3);
+  return {id:i+1, n:"Triada móvil "+(i+1), comunas: comunas.length?comunas:[COMUNAS[i%36]]};
+});
+const USUARIOS_SISTEMA = [
+  {id:"u1", nombre:"Camila Torres A.",  rol:"profesional", cargo:"Psicóloga · Triada móvil 5",   perfil:"psicosocial", comunas:["La Pintana","San Ramón","La Granja"], color:"#2a78d6", ini:"CT"},
+  {id:"u2", nombre:"Andrés Fuentes M.", rol:"profesional", cargo:"Abogado · Triada móvil 5",     perfil:"juridico",    comunas:["La Pintana","San Ramón","La Granja"], color:"#4a3aa7", ini:"AF"},
+  {id:"u3", nombre:"Rodrigo Salas P.",  rol:"coordinador", cargo:"Zona Sur · 8 comunas", perfil:"coordinacion", comunas:["La Pintana","San Ramón","La Granja","El Bosque","San Bernardo","Puente Alto","La Cisterna","Lo Espejo"], color:"#eb6834", ini:"RS"},
+  {id:"u4", nombre:"Daniela Vega L.",   rol:"secretaria",  cargo:"Equipo central del programa", perfil:"central", comunas:COMUNAS, color:"#008300", ini:"DV"},
+];
+const ROLES = {
+  profesional:{n:"Profesional", desc:"Ingreso de casos · registro de intervenciones · alertas de sus casos · acceso restringido a sus comunas asignadas"},
+  coordinador:{n:"Coordinador/a institucional", desc:"Todos los casos de sus comunas · brechas · indicadores del equipo · panel y tablero de sus comunas"},
+  secretaria:{n:"Secretaría Ejecutiva", desc:"Acceso total · asignación de comunas · reportes · administración del sistema"},
+};
+
+/* Nombres demo */
+const NOMBRES_F = ["María","Camila","Valentina","Fernanda","Javiera","Constanza","Antonia","Carla","Daniela","Paula","Katherine","Marcela","Rosa","Verónica","Patricia","Ana","Isidora","Francisca","Claudia","Yasna"];
+const NOMBRES_M = ["Juan","Pedro","Luis","Diego","Matías","Felipe","Cristóbal","Jorge","Manuel","Sebastián","Marcelo","Héctor","Iván","Rodrigo","Álvaro","Nicolás","Vicente","Gonzalo","Patricio","Boris"];
+const APELLIDOS = ["González","Muñoz","Rojas","Díaz","Pérez","Soto","Contreras","Silva","Martínez","Sepúlveda","Morales","Rodríguez","López","Fuentes","Hernández","Torres","Araya","Flores","Espinoza","Valenzuela","Castillo","Tapia","Reyes","Gutiérrez","Castro","Pizarro","Álvarez","Vásquez","Sanhueza","Fernández"];
+const CALLES = ["Av. Los Presidentes","Pasaje Los Aromos","Av. Santa Rosa","Calle El Roble","Av. La Serena","Pasaje Cinco","Av. Gabriela","Calle Los Copihues","Av. Observatorio","Calle Ranquil","Av. Portales","Pasaje Las Torcazas","Av. Central","Calle Bio Bio","Av. Balmaceda"];
+
+/* ==================== BASE DE DATOS EN MEMORIA (demo) ==================== */
+const DB = { casos:[], accesos:[], seqCaso:0, colaOffline:[], encuestas:[] };
+
+function nuevoCodigo(fecha){
+  DB.seqCaso += 1;
+  return "EC-" + fecha.getFullYear() + "-" + String(DB.seqCaso).padStart(5,"0");
+}
+
+/* Índice de priorización — puntaje automático (baremo demo, puntos 3 y 8 BT) */
+function calculaPriorizacion(c){
+  let pts = 0, detalle = [];
+  const del = DELITOS.find(d=>d.id===c.delito);
+  if(del){ pts += del.peso; detalle.push([del.n, del.peso]); }
+  (c.situaciones||[]).forEach(s=>{ const sp = SIT_PRIORIZACION.find(x=>x.id===s); if(sp){ pts += sp.pts; detalle.push([sp.n, sp.pts]); } });
+  (c.grupos||[]).forEach(()=>{ pts += 1; });
+  if((c.grupos||[]).length) detalle.push(["Grupos prioritarios ("+c.grupos.length+")", c.grupos.length]);
+  if(c.edad !== "" && c.edad != null){ if(c.edad >= 65){ pts += 2; detalle.push(["Persona de 65 o más años",2]); } else if(c.edad < 18){ pts += 3; detalle.push(["Menor de 18 años",3]); } }
+  const nivel = pts >= 12 ? "Alta" : pts >= 7 ? "Media" : "Baja";
+  return {pts, nivel, detalle};
+}
+
+function logAcceso(usuario, accion, detalle){
+  DB.accesos.unshift({t:new Date(), usuario: usuario?.nombre || "Sistema", rol: usuario?.rol || "—", accion, detalle});
+  if(DB.accesos.length > 400) DB.accesos.pop();
+}
+
+function cambiarEstado(caso, nuevo, quien, nota){
+  caso.estado = nuevo;
+  caso.historial.push({estado:nuevo, t:new Date(), por: quien, nota: nota||""});
+  caso.actualizado = new Date();
+}
+
+/* ---------- Semilla de datos demo (determinista) ---------- */
+function pickPeso(pares){ /* [[valor, peso], ...] */
+  const total = pares.reduce((a,p)=>a+p[1],0);
+  let r = rng()*total;
+  for(const [v,p] of pares){ r -= p; if(r<=0) return v; }
+  return pares[0][0];
+}
+const PESO_COMUNA = {"Puente Alto":8,"La Pintana":8,"Santiago":7,"La Florida":6,"San Bernardo":6,"Maipú":5,"El Bosque":5,"San Ramón":5,"La Granja":5,"Lo Espejo":4,"Pudahuel":4,"Recoleta":4,"Cerro Navia":4,"Renca":3,"Quilicura":3,"Peñalolén":3,"Estación Central":3,"Conchalí":3,"Pedro Aguirre Cerda":3,"Independencia":2,"Quinta Normal":2,"Lo Prado":2,"San Joaquín":2,"San Miguel":2,"Macul":2,"Huechuraba":2,"Cerrillos":2,"La Cisterna":2,"Lampa":1,"Colina":1,"Padre Hurtado":1,"Peñaflor":1,"Melipilla":1,"Talagante":1,"Buin":1,"Paine":1};
+const PESO_DELITO = {robo_violencia:29, robo_intimidacion:24, lesiones_graves:14, balacera:10, homicidio:7, homicidio_frustrado:6, secuestro:3, otro:7};
+function seedDatos(){
+  const N = 132;
+  const ahora = new Date(2026,6,31,10,0);   // se re-basa a la fecha real más abajo
+  const desfase = hoy() - ahora;            // corre todo el dataset hasta "hoy"
+  for(let i=0;i<N;i++){
+    const genero = pick(["Femenino","Femenino","Femenino","Masculino","Masculino","No binario"]);
+    const nombre = (genero==="Femenino" ? pick(NOMBRES_F) : pick(NOMBRES_M)) + " " + pick(APELLIDOS) + " " + pick(APELLIDOS);
+    const comuna = pickPeso(COMUNAS.map(c=>[c, PESO_COMUNA[c]||1]));
+    const delito = pickPeso(DELITOS.map(d=>[d.id, PESO_DELITO[d.id]||1]));
+    const haceDias = Math.floor(Math.pow(rng(), 1.35) * 128);   // más casos recientes
+    const fDelito  = new Date(+ahora - (haceDias+rint(0,6))*DAY + desfase);
+    const fDeriv   = new Date(+ahora - haceDias*DAY + rint(8,20)*36e5 + desfase);
+    const grupos = GRUPOS_PRIORITARIOS.filter(()=>rng()<0.09).map(g=>g.id);
+    const situaciones = SIT_PRIORIZACION.filter(()=>rng()<0.19).map(s=>s.id);
+    const prof = rng()<0.5 ? USUARIOS_SISTEMA[0] : USUARIOS_SISTEMA[1];
+    const c = {
+      id:"c"+(i+1), codigo:null,
+      nombre, rut: rutDemo(), edad: rint(15,84), genero,
+      telefono: "+56 9 " + rint(3000,9999) + " " + String(rint(0,9999)).padStart(4,"0"),
+      direccion: pick(CALLES) + " " + rint(40, 9800), comuna,
+      email: rng()<0.6 ? nombre.split(" ")[0].toLowerCase()+rint(1,99)+"@correo.cl" : "",
+      grupos, situaciones, delito,
+      fechaDelito: fDelito, fechaDerivacion: fDeriv,
+      canal: pick(CANALES),
+      triage: rng()<0.16 ? "Urgencia" : (rng()<0.5 ? "Moderado" : "Leve"),
+      responsable: prof.id, comunaEquipo: comuna,
+      estado:"derivado", historial:[], creado:fDeriv, actualizado:fDeriv,
+      fichas:{psicosocial:null, juridico:null},
+      sesiones:[], derivaciones:[], brechas:[],
+      consent1Contacto:false, consent1Visita:false,
+      egreso:null, satisfaccion:null, reingresos:0,
+    };
+    const pr = calculaPriorizacion(c); c.prioridad = pr;
+    c.historial.push({estado:"derivado", t:fDeriv, por:"Sistema (canal: "+c.canal+")", nota:""});
+
+    /* progresión del caso según antigüedad */
+    const prog = rng();
+    let cursor = new Date(+fDeriv);
+    const avanza = (est, hrs, por, nota) => { cursor = new Date(+cursor + hrs*36e5); if(cursor > new Date()) return false; cambiarEstado(c, est, por, nota); c.historial[c.historial.length-1].t = new Date(+cursor); return true; };
+    const pnom = prof.nombre;
+    if(haceDias >= 1 && prog > 0.06){
+      const hIng = c.prioridad.nivel==="Alta" ? rint(4,40) : rint(10,110);
+      if(avanza("ingresado", hIng, pnom, "Primer contacto realizado")){
+        c.consent1Contacto = true;
+        c.primeraAtencion = new Date(+cursor);
+        if(haceDias >= 3 && prog > 0.16 && avanza("atencion", rint(24,96), pnom, "Inicio plan de intervención")){
+          c.consent1Visita = rng() < 0.9;
+          c.fichas.psicosocial = fichaDemo("psicosocial", pnom, cursor);
+          if(rng()<0.55) c.fichas.juridico = fichaDemo("juridico", USUARIOS_SISTEMA[1].nombre, cursor);
+          const nSes = rint(1,6);
+          for(let s=0;s<nSes;s++){
+            const fs = new Date(+cursor + (s+1)*rint(4,9)*DAY); if(fs > new Date()) break;
+            c.sesiones.push({t:fs, tipo:pick(TIPOS_INTERVENCION), profesional: rng()<0.7?pnom:USUARIOS_SISTEMA[1].nombre, resultado:pick(["Realizada","Realizada","Realizada","Visita fallida","Reagendada"]), nota:"Registro de sesión de acompañamiento."});
+          }
+          if(rng()<0.62){
+            const inst = pick(INSTITUCIONES);
+            const fd = new Date(+cursor + rint(2,12)*DAY);
+            if(fd <= new Date()) c.derivaciones.push({t:fd, institucion:inst, motivo:pick(["Atención reparatoria especializada","Patrocinio jurídico","Salud mental","Apoyo social"]), estado: rng()<0.7 ? "Concretada" : (rng()<0.5?"Pendiente":"No concretada"), folio:"DER-"+rint(1000,9999), por:pnom});
+          }
+          if(rng()<0.18){ c.brechas.push({t:new Date(+cursor+rint(3,10)*DAY), detalle:pick(["Sin cupo en COSAM comunal","Lista de espera CAJ superior a 30 días","Sin oferta reparatoria para NNA en la comuna"]), por:USUARIOS_SISTEMA[2].nombre}); if(rng()<0.55 && prog<=0.35) cambiarEstado(c,"brecha",USUARIOS_SISTEMA[2].nombre,"Brecha de oferta registrada — caso en espera de cupo"); }
+          if(haceDias >= 12 && prog > 0.35 && avanza("seguimiento", rint(120,360), pnom, "Plan en seguimiento")){
+            if(haceDias >= 25 && prog > 0.55){
+              const eg = pick(EGRESOS);
+              if(avanza(eg.id===4 ? "egreso_adm" : "cerrado", rint(150,500), pnom, "Egreso: "+eg.n)){
+                c.egreso = {tipo:eg.id, glosa:eg.n, t:new Date(+cursor), informe:true};
+                if(eg.encuesta && rng()<0.8){ c.satisfaccion = rint(4,7); DB.encuestas.push({caso:c.id, nota:c.satisfaccion, t:new Date(+cursor+2*DAY)}); }
+                if(rng()<0.08){ avanza("reingreso", rint(300,900), "Sistema", "Reingreso por nueva victimización"); c.reingresos = 1; }
+              }
+            }
+          }
+        }
+      }
+    }
+    c.codigo = nuevoCodigo(c.fechaDerivacion);
+    DB.casos.push(c);
+  }
+  DB.casos.sort((a,b)=> b.fechaDerivacion - a.fechaDerivacion);
+}
+function fichaDemo(tipo, prof, base){
+  return {
+    completa:true, profesional:prof, t:new Date(+base + rint(1,3)*DAY),
+    evaluacion: tipo==="psicosocial" ? "Sintomatología ansiosa post evento. Red familiar presente parcial." : "Causa vigente en Fiscalía local. Requiere orientación en medidas de protección.",
+    intervencion: tipo==="psicosocial" ? "Primeros auxilios psicológicos" : "Orientación jurídica",
+    plan:{sesiones:rint(3,8), foco: tipo==="psicosocial" ? "Estabilización emocional y activación de red" : "Acompañamiento al proceso penal"},
+  };
+}
+
+/* ==================== SESIÓN / AUTENTICACIÓN (demo) ==================== */
+const S = { user:null, vista:"dashboard", casoAbierto:null, offline:false, filtros:{}, tema:null, alertasVistas:false };
+
+function comunasDe(u){ return u.rol==="secretaria" ? COMUNAS : u.comunas; }
+function casosVisibles(u=S.user){
+  if(!u) return [];
+  let cs = DB.casos.filter(c => comunasDe(u).includes(c.comuna));
+  if(u.rol==="profesional") cs = cs.filter(c => c.responsable===u.id || comunasDe(u).includes(c.comuna));
+  return cs;
+}
+function casosPropios(u=S.user){ return u.rol==="profesional" ? DB.casos.filter(c=>c.responsable===u.id) : casosVisibles(u); }
+
+/* ==================== ALERTAS AUTOMÁTICAS (punto 2.5 BT) ==================== */
+function calcAlertas(u=S.user){
+  const out = []; const ahora = hoy();
+  const cs = casosVisibles(u);
+  for(const c of cs){
+    const hrsDeriv = (ahora - c.fechaDerivacion)/36e5;
+    /* a) gestión */
+    if(c.estado==="derivado" && hrsDeriv > 48)
+      out.push({cat:"gestion", sev: hrsDeriv>96 ? "critical":"serious", t:"Retraso en ingreso", d:`Derivado hace ${Math.floor(hrsDeriv/24)} días sin primer contacto`, caso:c});
+    if(c.estado==="ingresado" && !c.primeraAtencionOK && hrsDeriv > ESTANDAR_PRIMERA_ATENCION_HRS && !c.primeraAtencion)
+      out.push({cat:"gestion", sev:"serious", t:"Retraso en atención", d:`Supera el estándar de ${ESTANDAR_PRIMERA_ATENCION_HRS} h para primera atención`, caso:c});
+    if(["ingresado","atencion","seguimiento"].includes(c.estado) && diasEntre(c.actualizado, ahora) > DIAS_SIN_ACTUALIZAR)
+      out.push({cat:"gestion", sev:"warning", t:"Caso sin actualización", d:`${diasEntre(c.actualizado, ahora)} días sin registros`, caso:c});
+    /* b) criticidad */
+    if(c.prioridad.nivel==="Alta" && !["cerrado","egreso_adm"].includes(c.estado))
+      out.push({cat:"criticidad", sev:"critical", t:"Caso de alta priorización", d:`Índice ${c.prioridad.pts} pts — requiere atención prioritaria`, caso:c});
+    if(c.triage==="Urgencia" && !["cerrado","egreso_adm"].includes(c.estado))
+      out.push({cat:"criticidad", sev:"critical", t:"Urgencia según triage psicológico", d:"Triage de primera respuesta arroja urgencia", caso:c});
+    /* c) seguimiento */
+    if(c.estado==="reingreso")
+      out.push({cat:"seguimiento", sev:"serious", t:"Reingreso de caso cerrado", d:"Nueva victimización sobre caso previamente cerrado", caso:c});
+    if(c.estado==="egreso_adm" && diasEntre(c.actualizado, ahora) < 20)
+      out.push({cat:"seguimiento", sev:"warning", t:"Pérdida de contacto", d:"Egreso administrativo por intentos fallidos documentados", caso:c});
+    c.derivaciones.filter(d=>d.estado==="No concretada").forEach(d=>
+      out.push({cat:"seguimiento", sev:"serious", t:"Derivación no concretada", d:`${d.institucion} — requiere reactivación`, caso:c}));
+    c.derivaciones.filter(d=>d.estado==="Pendiente" && diasEntre(d.t, ahora)>10).forEach(d=>
+      out.push({cat:"seguimiento", sev:"warning", t:"Derivación pendiente", d:`${d.institucion} sin confirmación hace ${diasEntre(d.t,ahora)} días`, caso:d.caso||c}));
+  }
+  const sevOrder = {critical:0, serious:1, warning:2};
+  out.sort((a,b)=> sevOrder[a.sev]-sevOrder[b.sev]);
+  return out;
+}
+
+/* ==================== TOASTS / TOOLTIP / MODAL ==================== */
+function toast(titulo, cuerpo="", tipo="ok"){
+  const z = $("#toast-zone");
+  const el = document.createElement("div");
+  el.className = "toast " + (tipo==="ok"?"":tipo);
+  el.innerHTML = `<b>${esc(titulo)}</b>${cuerpo?`<span>${esc(cuerpo)}</span>`:""}`;
+  z.appendChild(el);
+  setTimeout(()=>{ el.style.opacity="0"; el.style.transition="opacity .3s"; setTimeout(()=>el.remove(), 320); }, 4200);
+}
+const TT = $("#viz-tooltip");
+function ttShow(html, x, y){
+  TT.innerHTML = html; TT.style.opacity = "1";
+  const w = TT.offsetWidth, h = TT.offsetHeight;
+  let px = x + 14, py = y - h - 10;
+  if(px + w > innerWidth - 8) px = x - w - 14;
+  if(py < 8) py = y + 16;
+  TT.style.left = px+"px"; TT.style.top = py+"px";
+}
+function ttHide(){ TT.style.opacity = "0"; }
+
+let modalCerrar = null;
+function abreModal(html, {size="", onClose=null}={}){
+  cierraModal();
+  const back = document.createElement("div");
+  back.className = "modal-back on"; back.id = "modal-actual";
+  back.innerHTML = `<div class="modal ${size}" role="dialog" aria-modal="true">${html}</div>`;
+  document.body.appendChild(back);
+  back.addEventListener("mousedown", e=>{ if(e.target===back) cierraModal(); });
+  modalCerrar = onClose;
+  const x = $(".modal-head .x", back); if(x) x.onclick = cierraModal;
+  return back;
+}
+function cierraModal(){ const m = $("#modal-actual"); if(m){ m.remove(); if(modalCerrar){ const f=modalCerrar; modalCerrar=null; f(); } } }
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") cierraModal(); });
+
+/* ==================== MODO OFFLINE (PWA) ==================== */
+function setConn(online){
+  S.offline = !online;
+  const pill = $("#conn-pill"); if(!pill) return;
+  pill.classList.toggle("off", !online);
+  $("#conn-label").textContent = online ? "En línea" : "Sin conexión — modo offline";
+  const n = DB.colaOffline.length;
+  $("#sync-n").style.display = n ? "" : "none";
+  $("#sync-n").textContent = n;
+  if(online && n){
+    setTimeout(()=>{
+      const cuantos = DB.colaOffline.length; DB.colaOffline = [];
+      toast("Sincronización completada", cuantos + " registro(s) locales enviados al servidor institucional.");
+      setConn(true);
+    }, 1200);
+  }
+}
+function registraOperacion(desc){
+  if(S.offline){ DB.colaOffline.push({t:new Date(), desc}); setConn(false); toast("Guardado localmente", "Sin conexión: se sincronizará al recuperar señal.", "warn"); }
+}
+addEventListener("online",  ()=> setConn(true));
+addEventListener("offline", ()=> setConn(false));
+
+/* ==================== ICONOS ==================== */
+const I = {
+  dash:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
+  casos:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg>',
+  nuevo:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
+  carga:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 8l5-5 5 5"/><path d="M12 3v12"/></svg>',
+  alerta:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  deriv:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>',
+  rep:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 17v-3M12 17v-6M16 17v-2"/></svg>',
+  tablero:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M9 18v3M15 18v3M8 21h8"/></svg>',
+  viz:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M8.5 11h5M11 8.5v5"/></svg>',
+  admin:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>',
+  manual:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>',
+  salir:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>',
+  lupa:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
+  campana:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
+  luna:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>',
+  menu:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>',
+  check:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  x:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  shield:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>',
+  descarga:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>',
+  print:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>',
+};
+function sevIcono(sev){
+  const c = sev==="critical" ? "var(--critical)" : sev==="serious" ? "var(--serious)" : "var(--warning)";
+  const bg = `color-mix(in srgb, ${c} 14%, transparent)`;
+  return `<span class="ai-ico" style="background:${bg};color:${c}">${I.alerta}</span>`;
+}
+const SEV_N = {critical:"Crítica", serious:"Seria", warning:"Preventiva"};
+
+/* ==================== MINI LIBRERÍA DE GRÁFICOS SVG ====================
+   Especificación de marcas: barras ≤24px con extremo redondeado 4px,
+   líneas 2px, marcadores ≥8px con anillo de superficie, grillas hairline. */
+const PAL = ["var(--s1)","var(--s2)","var(--s3)","var(--s4)","var(--s5)","var(--s6)","var(--s7)","var(--s8)"];
+
+function niceMax(v){ if(v<=0) return 1; const p = Math.pow(10, Math.floor(Math.log10(v))); const n = v/p; const m = n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10; return m*p; }
+function ticks(max, n=4){ const out=[]; for(let i=0;i<=n;i++) out.push(Math.round(max*i/n)); return [...new Set(out)]; }
+
+/* Barras horizontales (ranking) */
+function chartBarsH(data, {color="var(--s1)", height=null, unidad="", labelW=118}={}){
+  const rowH = 30, gap = 8, w = 560;
+  const max = niceMax(Math.max(...data.map(d=>d.v), 1));
+  const bw = w - labelW - 58;
+  const h = data.length * (rowH) + 6;
+  let s = `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto" role="img" aria-label="Gráfico de barras">`;
+  data.forEach((d,i)=>{
+    const y = i*rowH + 5;
+    const len = Math.max(4, d.v/max * bw);
+    const col = d.color || color;
+    const maxCh = Math.floor(labelW/6.4);
+    s += `<text x="${labelW-8}" y="${y+13}" text-anchor="end" font-size="11.5" fill="var(--ink-2)">${esc(d.n.length>maxCh? d.n.slice(0,maxCh-1)+"…" : d.n)}</text>`;
+    s += `<path d="M ${labelW} ${y} h ${len-4} a4 4 0 0 1 4 4 v ${12} a4 4 0 0 1 -4 4 h -${len-4} z" fill="${col}" class="mark" data-tt="${esc(d.n)}|${fmtN(d.v)}${unidad}"></path>`;
+    s += `<text x="${labelW + len + 7}" y="${y+14}" font-size="11.5" font-weight="650" fill="var(--ink-1)">${fmtN(d.v)}${unidad}</text>`;
+  });
+  s += `</svg>`;
+  return s;
+}
+
+/* Columnas verticales, series única o apiladas */
+function chartCols(data, {series=null, colors=PAL, height=210, unidad=""}={}){
+  const w=560, h=height, padL=38, padB=24, padT=12;
+  const innerW = w-padL-10, innerH = h-padB-padT;
+  const totales = data.map(d => series ? series.reduce((a,s)=>a+(d[s.k]||0),0) : d.v);
+  const max = niceMax(Math.max(...totales,1));
+  const n = data.length;
+  const slot = innerW/n;
+  const bw = Math.min(24, slot*0.62);
+  let s = `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto" role="img" aria-label="Gráfico de columnas">`;
+  ticks(max).forEach(t=>{
+    const y = padT + innerH - t/max*innerH;
+    s += `<line x1="${padL}" y1="${y}" x2="${w-8}" y2="${y}" stroke="var(--grid)" stroke-width="1"/>`;
+    s += `<text x="${padL-6}" y="${y+3.5}" text-anchor="end" font-size="10" fill="var(--ink-3)" style="font-variant-numeric:tabular-nums">${fmtN(t)}</text>`;
+  });
+  data.forEach((d,i)=>{
+    const cx = padL + slot*i + slot/2;
+    let acumY = padT + innerH;
+    if(series){
+      series.forEach((sr,si)=>{
+        const v = d[sr.k]||0; if(!v) return;
+        const bh = v/max*innerH;
+        const y = acumY - bh;
+        const esTope = si === series.length-1 || series.slice(si+1).every(x=>!(d[x.k]||0));
+        const r = esTope ? 4 : 0;
+        s += `<path d="M ${cx-bw/2} ${y+r} a ${r} ${r} 0 0 1 ${r} -${r} h ${bw-2*r} a ${r} ${r} 0 0 1 ${r} ${r} v ${Math.max(bh-r-1.2,0)} h -${bw} z" fill="${colors[si]}" class="mark" data-tt="${esc(d.n)} · ${esc(sr.n)}|${fmtN(v)}${unidad}"/>`;
+        acumY = y - 2; /* separador de superficie 2px */
+      });
+    } else {
+      const bh = Math.max(d.v/max*innerH, d.v?3:0);
+      const y = padT + innerH - bh;
+      s += `<path d="M ${cx-bw/2} ${y+4} a4 4 0 0 1 4 -4 h ${bw-8} a4 4 0 0 1 4 4 v ${Math.max(bh-4,0)} h -${bw} z" fill="${d.color||colors[0]}" class="mark" data-tt="${esc(d.n)}|${fmtN(d.v)}${unidad}"/>`;
+    }
+    s += `<text x="${cx}" y="${h-7}" text-anchor="middle" font-size="10" fill="var(--ink-3)">${esc(d.n)}</text>`;
+  });
+  s += `</svg>`;
+  return s;
+}
+
+/* Línea de tendencia (1-2 series) con marcador final etiquetado */
+function chartLine(data, {series=[{k:"v",n:"Serie"}], colors=PAL, height=210, unidad=""}={}){
+  const w=560, h=height, padL=38, padB=24, padT=12, padR=44;
+  const innerW = w-padL-padR, innerH = h-padB-padT;
+  const max = niceMax(Math.max(...data.flatMap(d=>series.map(s=>d[s.k]||0)),1));
+  const X = i => padL + (data.length===1 ? innerW/2 : innerW*i/(data.length-1));
+  const Y = v => padT + innerH - v/max*innerH;
+  let s = `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto" role="img" aria-label="Gráfico de tendencia">`;
+  ticks(max).forEach(t=>{
+    s += `<line x1="${padL}" y1="${Y(t)}" x2="${w-padR+18}" y2="${Y(t)}" stroke="var(--grid)" stroke-width="1"/>`;
+    s += `<text x="${padL-6}" y="${Y(t)+3.5}" text-anchor="end" font-size="10" fill="var(--ink-3)" style="font-variant-numeric:tabular-nums">${fmtN(t)}</text>`;
+  });
+  data.forEach((d,i)=>{ if(i%Math.ceil(data.length/8)===0 || i===data.length-1) s += `<text x="${X(i)}" y="${h-7}" text-anchor="middle" font-size="10" fill="var(--ink-3)">${esc(d.n)}</text>`; });
+  series.forEach((sr,si)=>{
+    const col = colors[si];
+    const pts = data.map((d,i)=>`${X(i)},${Y(d[sr.k]||0)}`).join(" ");
+    s += `<polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    data.forEach((d,i)=>{
+      s += `<circle cx="${X(i)}" cy="${Y(d[sr.k]||0)}" r="7.5" fill="transparent" class="mark" data-tt="${esc(d.n)} · ${esc(sr.n)}|${fmtN(d[sr.k]||0)}${unidad}"/>`;
+    });
+    const last = data[data.length-1];
+    s += `<circle cx="${X(data.length-1)}" cy="${Y(last[sr.k]||0)}" r="4.5" fill="${col}" stroke="var(--surface-1)" stroke-width="2"/>`;
+    s += `<text x="${X(data.length-1)+8}" y="${Y(last[sr.k]||0)+4}" font-size="11" font-weight="650" fill="var(--ink-1)">${fmtN(last[sr.k]||0)}${unidad}</text>`;
+  });
+  s += `</svg>`;
+  return s;
+}
+
+/* Dona (composición, ≤4 categorías + Otros) */
+function chartDonut(data, {size=170, grosor=26}={}){
+  const total = data.reduce((a,d)=>a+d.v,0) || 1;
+  const R = size/2 - 4, r = R - grosor, cx = size/2, cy = size/2;
+  let ang = -Math.PI/2, s = `<svg viewBox="0 0 ${size} ${size}" style="width:${size}px;max-width:100%;height:auto" role="img" aria-label="Gráfico de composición">`;
+  data.forEach((d,i)=>{
+    const frac = d.v/total; if(frac<=0) return;
+    const a2 = ang + frac*2*Math.PI - 0.028; /* separador */
+    const x1=cx+R*Math.cos(ang), y1=cy+R*Math.sin(ang), x2=cx+R*Math.cos(a2), y2=cy+R*Math.sin(a2);
+    const x3=cx+r*Math.cos(a2), y3=cy+r*Math.sin(a2), x4=cx+r*Math.cos(ang), y4=cy+r*Math.sin(ang);
+    const big = frac>0.5?1:0;
+    s += `<path d="M ${x1} ${y1} A ${R} ${R} 0 ${big} 1 ${x2} ${y2} L ${x3} ${y3} A ${r} ${r} 0 ${big} 0 ${x4} ${y4} Z" fill="${d.color||PAL[i]}" class="mark" data-tt="${esc(d.n)}|${fmtN(d.v)} (${Math.round(frac*100)}%)"/>`;
+    ang = a2 + 0.028;
+  });
+  s += `<text x="${cx}" y="${cy-2}" text-anchor="middle" font-size="21" font-weight="700" fill="var(--ink-1)">${fmtN(total)}</text>`;
+  s += `<text x="${cx}" y="${cy+15}" text-anchor="middle" font-size="9.5" fill="var(--ink-3)">TOTAL</text>`;
+  s += `</svg>`;
+  return s;
+}
+
+function legendHtml(items){
+  return `<div class="legend">` + items.map((it,i)=>`<span class="li"><span class="sw" style="background:${it.color||PAL[i]}"></span>${esc(it.n)}</span>`).join("") + `</div>`;
+}
+
+/* Escala secuencial azul para mapa de calor */
+function seqColor(v, max){
+  const steps = ["#cde2fb","#b7d3f6","#9ec5f4","#86b6ef","#6da7ec","#5598e7","#3987e5","#2a78d6","#256abf","#1c5cab","#184f95","#104281","#0d366b"];
+  if(max<=0) return steps[0];
+  const idx = Math.min(steps.length-1, Math.floor((v/max)*(steps.length-1)));
+  return steps[idx];
+}
+function inkPara(bg){
+  const r=parseInt(bg.slice(1,3),16), g=parseInt(bg.slice(3,5),16), b=parseInt(bg.slice(5,7),16);
+  return (0.2126*r + 0.7152*g + 0.0722*b) > 150 ? "#0b0b0b" : "#ffffff";
+}
+
+/* Tooltips delegados sobre .mark */
+document.addEventListener("mousemove", e=>{
+  const m = e.target.closest?.(".mark");
+  if(m && m.dataset.tt){
+    const [t, v] = m.dataset.tt.split("|");
+    ttShow(`<b>${esc(t)}</b><div class="tt-row"><span>${esc(v)}</span></div>`, e.clientX, e.clientY);
+  } else ttHide();
+});
+document.addEventListener("mouseleave", ttHide);
+
+/* ==================== LOGIN Y SHELL ==================== */
+function renderLogin(){
+  const ls = $("#login-screen");
+  ls.style.display = "flex";
+  $("#app").classList.remove("on");
+  ls.innerHTML = `
+  <div class="login-hero">
+    <div>
+      <div class="gore-tag"><span class="crest">GORE<br>RMS</span><span>Gobierno Regional<br>Metropolitano de Santiago</span></div>
+      <h1>Estamos Contigo</h1>
+      <p class="sub">Plataforma de gestión de casos · Componente N°1 — Primera Respuesta, Atención a Víctimas de Delitos Violentos. Programa Defensoría a Víctimas de Delitos Violentos.</p>
+    </div>
+    <div class="hero-feats">
+      <div>${I.shield} Datos personales y sensibles protegidos — cifrado en tránsito y en reposo</div>
+      <div>${I.check} Trazabilidad completa del proceso de intervención, del ingreso al egreso</div>
+      <div>${I.check} PWA con modo offline para el trabajo territorial de las 17 triadas móviles</div>
+    </div>
+  </div>
+  <div class="login-panel">
+    <div class="login-card">
+      <h2>Iniciar sesión</h2>
+      <p>Selecciona un perfil de demostración para ingresar.</p>
+      <div class="role-cards" role="radiogroup" aria-label="Perfil de acceso">
+        ${USUARIOS_SISTEMA.filter(u=>["u1","u3","u4"].includes(u.id)).map(u=>`
+          <button class="role-card" data-user="${u.id}" aria-pressed="false">
+            <span class="avatar" style="background:${u.color}">${u.ini}</span>
+            <span style="min-width:0">
+              <span class="rc-name">${esc(u.nombre)}</span><br>
+              <span class="rc-role">${ROLES[u.rol].n} — ${esc(u.cargo)}</span><br>
+              <span class="rc-scope">${u.rol==="secretaria" ? "Acceso a las 36 comunas priorizadas" : "Comunas: "+u.comunas.slice(0,3).join(", ")+(u.comunas.length>3?" +"+(u.comunas.length-3):"")}</span>
+            </span>
+          </button>`).join("")}
+      </div>
+      <div class="field"><label for="lg-pass">Contraseña</label><input id="lg-pass" type="password" value="demo·2026" autocomplete="current-password"></div>
+      <button class="btn btn-primary btn-block" id="lg-btn" disabled>Ingresar a la plataforma</button>
+      <p class="login-foot">Autenticación de demostración. En producción: credenciales institucionales con MFA / ClaveÚnica,<br>sesiones cifradas (HTTPS/TLS 1.3) y registro de accesos auditable.</p>
+    </div>
+  </div>`;
+  let sel = null;
+  $$(".role-card", ls).forEach(b=>{
+    b.onclick = ()=>{
+      $$(".role-card", ls).forEach(x=>x.setAttribute("aria-pressed","false"));
+      b.setAttribute("aria-pressed","true");
+      sel = b.dataset.user; $("#lg-btn").disabled = false;
+    };
+  });
+  $("#lg-btn").onclick = ()=>{
+    const u = USUARIOS_SISTEMA.find(x=>x.id===sel); if(!u) return;
+    S.user = u; S.vista = "dashboard"; S.casoAbierto = null; S.filtros = {};
+    logAcceso(u, "Inicio de sesión", "Autenticación correcta desde dispositivo móvil (demo)");
+    renderApp();
+  };
+}
+
+function nav(vista, extra){
+  S.vista = vista;
+  if(vista!=="detalle") S.casoAbierto = null;
+  if(extra!==undefined) S.casoAbierto = extra;
+  renderApp();
+  $(".sidebar")?.classList.remove("open"); $("#scrim").classList.remove("on");
+  scrollTo({top:0});
+}
+function abreCaso(id){ S.vista="detalle"; S.casoAbierto = id; renderApp(); scrollTo({top:0}); }
+
+function renderApp(){
+  const u = S.user; if(!u){ renderLogin(); return; }
+  $("#login-screen").style.display = "none";
+  const app = $("#app"); app.classList.add("on");
+  const alertas = calcAlertas();
+  const nCrit = alertas.filter(a=>a.sev==="critical").length;
+  const items = [
+    ["dashboard","Dashboard de gestión",I.dash, null, true],
+    ["casos","Casos",I.casos, null, true],
+    ["nuevo","Ingresar caso",I.nuevo, null, true],
+    ["carga","Carga masiva",I.carga, null, u.rol!=="profesional"],
+    ["alertas","Alertas",I.alerta, alertas.length, true],
+    ["derivaciones","Derivaciones",I.deriv, null, true],
+    ["reportes","Reportes mensuales",I.rep, null, u.rol!=="profesional"],
+    ["tablero","Tablero ejecutivo",I.tablero, null, u.rol!=="profesional"],
+    ["viz","Visualización territorial",I.viz, null, u.rol!=="profesional"],
+    ["admin","Administración",I.admin, null, u.rol==="secretaria"],
+    ["manual","Manual de uso",I.manual, null, true],
+  ];
+  app.innerHTML = `
+  <nav class="sidebar" aria-label="Navegación principal">
+    <div class="side-brand"><span class="crest">EC</span><div><b>Estamos Contigo</b><span>GORE R.M. · Defensoría a Víctimas</span></div></div>
+    <div class="nav-sec">Operación</div>
+    ${items.slice(0,6).filter(i=>i[4]).map(i=>navItem(i)).join("")}
+    <div class="nav-sec">Análisis y monitoreo</div>
+    ${items.slice(6,9).filter(i=>i[4]).map(i=>navItem(i)).join("")}
+    ${items.slice(9).some(i=>i[4]) ? `<div class="nav-sec">Sistema</div>` + items.slice(9).filter(i=>i[4]).map(i=>navItem(i)).join("") : ""}
+    <div class="side-user">
+      <span class="avatar" style="background:${u.color}">${u.ini}</span>
+      <div style="min-width:0"><b>${esc(u.nombre)}</b><span>${ROLES[u.rol].n}</span></div>
+      <button class="icon-btn" title="Cerrar sesión" aria-label="Cerrar sesión" onclick="cerrarSesion()">${I.salir}</button>
+    </div>
+  </nav>
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn hamburger" aria-label="Abrir menú" onclick="toggleMenu()">${I.menu}</button>
+      <div class="searchbox">
+        ${I.lupa}
+        <input id="global-search" type="search" placeholder="Buscar por código, nombre o RUT…" autocomplete="off" aria-label="Buscar casos">
+        <div class="search-results" id="search-results"></div>
+      </div>
+      <div class="topbar-right">
+        <div class="conn-pill" id="conn-pill"><span class="dot"></span><span id="conn-label">En línea</span><span class="sync-n" id="sync-n" style="display:none">0</span></div>
+        <button class="icon-btn" title="Alertas" aria-label="Ver alertas" onclick="nav('alertas')">${I.campana}${nCrit?`<span class="bubble">${nCrit}</span>`:""}</button>
+        <button class="icon-btn" title="Cambiar tema claro/oscuro" aria-label="Cambiar tema" onclick="toggleTema()">${I.luna}</button>
+      </div>
+    </header>
+    <main class="content" id="content"></main>
+  </div>`;
+  setConn(!S.offline);
+  wireSearch();
+  const cont = $("#content");
+  const vistas = {dashboard:vDashboard, casos:vCasos, nuevo:vNuevoCaso, carga:vCarga, alertas:vAlertas, derivaciones:vDerivaciones, reportes:vReportes, tablero:vTablero, viz:vViz, admin:vAdmin, manual:vManual, detalle:vDetalle};
+  (vistas[S.vista]||vDashboard)(cont);
+}
+function navItem([id,n,ico,badge]){
+  return `<button class="nav-item ${S.vista===id?"active":""}" onclick="nav('${id}')">${ico}<span>${n}</span>${badge?`<span class="nav-badge">${badge}</span>`:""}</button>`;
+}
+function toggleMenu(){ const sb=$(".sidebar"); const on = sb.classList.toggle("open"); $("#scrim").classList.toggle("on", on); }
+$("#scrim").onclick = ()=>{ $(".sidebar")?.classList.remove("open"); $("#scrim").classList.remove("on"); };
+function cerrarSesion(){ logAcceso(S.user,"Cierre de sesión",""); S.user=null; renderLogin(); }
+function toggleTema(){
+  const r = document.documentElement;
+  const cur = r.getAttribute("data-theme");
+  const oscuroOS = matchMedia("(prefers-color-scheme: dark)").matches;
+  const activo = cur ? cur==="dark" : oscuroOS;
+  r.setAttribute("data-theme", activo ? "light" : "dark");
+}
+function wireSearch(){
+  const inp = $("#global-search"), res = $("#search-results");
+  if(!inp) return;
+  inp.oninput = ()=>{
+    const q = inp.value.trim().toLowerCase();
+    if(q.length<2){ res.classList.remove("on"); return; }
+    const hits = casosVisibles().filter(c => c.codigo.toLowerCase().includes(q) || c.nombre.toLowerCase().includes(q) || normRut(c.rut).toLowerCase().includes(normRut(q).toLowerCase())).slice(0,8);
+    res.innerHTML = hits.length ? hits.map(c=>`<button class="sr-item" onclick="abreCaso('${c.id}')"><b>${esc(c.codigo)} — ${esc(c.nombre)}</b><span>${esc(c.comuna)} · ${estadoChip(c.estado)}</span></button>`).join("")
+      : `<div class="sr-item"><span>Sin resultados en tus comunas asignadas.</span></div>`;
+    res.classList.add("on");
+  };
+  inp.onblur = ()=> setTimeout(()=>res.classList.remove("on"), 180);
+  inp.onfocus = ()=>{ if(inp.value.trim().length>=2) res.classList.add("on"); };
+}
+
+/* chips de estado y prioridad */
+function estadoChip(id){
+  const e = ESTADOS.find(x=>x.id===id);
+  return `<span class="chip" style="background:color-mix(in srgb, ${e.color} 12%, transparent); color:${e.color}; border-color:color-mix(in srgb, ${e.color} 30%, transparent)"><span class="cdot" style="background:${e.color}"></span>${e.n}</span>`;
+}
+function prioChip(p){
+  const map = {Alta:["var(--critical)","▲"], Media:["var(--serious)","●"], Baja:["var(--good)","▼"]};
+  const [c,ico] = map[p.nivel];
+  return `<span class="chip" style="background:color-mix(in srgb, ${c} 12%, transparent); color:${c}; border-color:color-mix(in srgb, ${c} 30%, transparent)" title="Índice de priorización: ${p.pts} puntos">${ico} ${p.nivel} · ${p.pts}</span>`;
+}
+
+/* ==================== VISTA: DASHBOARD (punto 2.6 BT) ==================== */
+function mesKey(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); }
+function ultimosMeses(n){
+  const out=[]; const base = hoy();
+  for(let i=n-1;i>=0;i--){ const d = new Date(base.getFullYear(), base.getMonth()-i, 1); out.push({key:mesKey(d), n:cap(d.toLocaleDateString("es-CL",{month:"short"})), date:d}); }
+  return out;
+}
+function vDashboard(el){
+  const u = S.user;
+  const cs = casosVisibles();
+  const abiertos = cs.filter(c=>!["cerrado","egreso_adm"].includes(c.estado));
+  const meses = ultimosMeses(5);
+  const porMes = meses.map(m=>({...m, v: cs.filter(c=>mesKey(c.fechaDerivacion)===m.key).length}));
+  const esteMes = porMes[porMes.length-1].v, mesAnt = porMes[porMes.length-2].v;
+  const deltaMes = mesAnt ? Math.round((esteMes-mesAnt)/mesAnt*100) : 0;
+  const atendidos = cs.filter(c=>c.primeraAtencion).length;
+  const tasaAtencion = pct(atendidos, cs.length);
+  const enSeg = cs.filter(c=>c.estado==="seguimiento").length;
+  const cerrados = cs.filter(c=>["cerrado","egreso_adm"].includes(c.estado)).length;
+  const tprom = tiempoPromedioPrimeraAtencion(cs);
+  const cumpl = cumplimientoEstandar(cs);
+  const alertas = calcAlertas().slice(0,5);
+
+  /* distribución por comuna (top 8) */
+  const porComuna = comunasDe(u).map(cm=>({n:cm, v: cs.filter(c=>c.comuna===cm).length})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v).slice(0,8);
+  /* tipología delictual */
+  const porDelito = DELITOS.map(d=>({n:d.n, v: cs.filter(c=>c.delito===d.id).length})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  const delTop = porDelito.slice(0,3); const delOtros = porDelito.slice(3).reduce((a,d)=>a+d.v,0);
+  const donaDelitos = [...delTop, ...(delOtros?[{n:"Otros",v:delOtros,color:"var(--axisline)"}]:[])];
+  /* cobertura por estado — embudo */
+  const cob = [
+    {n:"Derivados", v: cs.length},
+    {n:"Atendidos", v: atendidos},
+    {n:"En seguimiento", v: enSeg},
+    {n:"Egresados", v: cerrados},
+  ];
+  /* perfil por género */
+  const gen = ["Femenino","Masculino","No binario"].map((g,i)=>({n:g, v: cs.filter(c=>c.genero===g).length, color:PAL[i]}));
+
+  el.innerHTML = `
+  <div class="page-head">
+    <div><h2>Dashboard de gestión</h2><p class="pg-sub">${u.rol==="secretaria" ? "36 comunas priorizadas · Región Metropolitana" : "Comunas asignadas: "+comunasDe(u).join(", ")}</p></div>
+    <div class="actions"><button class="btn btn-secondary" onclick="nav('reportes')">${I.rep} Reporte mensual</button><button class="btn btn-primary" onclick="nav('nuevo')">${I.nuevo} Ingresar caso</button></div>
+  </div>
+
+  <div class="grid g-4" style="margin-bottom:16px">
+    <div class="card stat-tile"><span class="st-label">Personas usuarias</span><span class="st-value">${fmtN(cs.length)}</span>
+      <span class="st-delta ${deltaMes>=0?"up":"down"}">${deltaMes>=0?"▲":"▼"} ${Math.abs(deltaMes)}% <span style="color:var(--ink-3);font-weight:500">vs mes anterior</span></span>
+      <span class="st-foot">${fmtN(esteMes)} ingresos en ${fmes(hoy())}</span></div>
+    <div class="card stat-tile"><span class="st-label">Casos activos</span><span class="st-value">${fmtN(abiertos.length)}</span>
+      <span class="st-delta"><span style="color:var(--ink-3);font-weight:500">${fmtN(enSeg)} en seguimiento</span></span>
+      <span class="st-foot">${fmtN(cerrados)} egresados a la fecha</span></div>
+    <div class="card stat-tile"><span class="st-label">Tiempo 1ª atención</span><span class="st-value">${tprom.toFixed(1)} <span style="font-size:15px;color:var(--ink-3)">días</span></span>
+      <span class="st-delta ${tprom<=3?"up":"down"}">${tprom<=3?"▲ Dentro":"▼ Fuera"} <span style="color:var(--ink-3);font-weight:500">del estándar (≤ ${ESTANDAR_PRIMERA_ATENCION_HRS} h)</span></span>
+      <span class="st-foot">Promedio desde la derivación</span></div>
+    <div class="card stat-tile"><span class="st-label">Cumplimiento de estándares</span><span class="st-value">${cumpl}%</span>
+      <div class="progressbar" style="margin-top:6px"><div style="width:${cumpl}%"></div></div>
+      <span class="st-foot">Casos con 1ª atención dentro de ${ESTANDAR_PRIMERA_ATENCION_HRS} h</span></div>
+  </div>
+
+  <div class="grid g-2-1" style="margin-bottom:16px">
+    <div class="card card-pad">
+      <h3>Situación general — ingresos mensuales</h3><div class="card-sub">Casos derivados al programa por mes</div>
+      ${chartCols(porMes, {height:205})}
+    </div>
+    <div class="card card-pad">
+      <h3>Caracterización — tipología delictual</h3><div class="card-sub">Composición de los casos</div>
+      <div style="display:flex; justify-content:center">${chartDonut(donaDelitos)}</div>
+      ${legendHtml(donaDelitos.map((d,i)=>({n:d.n, color:d.color||PAL[i]})))}
+    </div>
+  </div>
+
+  <div class="grid g-3" style="margin-bottom:16px">
+    <div class="card card-pad">
+      <h3>Cobertura del programa</h3><div class="card-sub">Atendidos · derivados · seguimiento · egresados</div>
+      ${chartBarsH(cob, {color:"var(--s1)"})}
+      <div class="hint" style="margin-top:8px">Tasa de atención: <b style="color:var(--ink-1)">${tasaAtencion}%</b> de los casos derivados</div>
+    </div>
+    <div class="card card-pad">
+      <h3>Distribución por comuna</h3><div class="card-sub">Top ${porComuna.length} de ${u.rol==="secretaria"?36:comunasDe(u).length} comunas</div>
+      ${chartBarsH(porComuna, {color:"var(--s3)"})}
+    </div>
+    <div class="card card-pad">
+      <h3>Perfil de usuarios</h3><div class="card-sub">Distribución por género y edad</div>
+      <div style="display:flex; justify-content:center">${chartDonut(gen, {size:150})}</div>
+      ${legendHtml(gen)}
+      <div class="hint" style="margin-top:8px">Edad promedio: <b style="color:var(--ink-1)">${Math.round(cs.reduce((a,c)=>a+c.edad,0)/(cs.length||1))} años</b> · Grupos prioritarios: <b style="color:var(--ink-1)">${pct(cs.filter(c=>c.grupos.length).length, cs.length)}%</b></div>
+    </div>
+  </div>
+
+  <div class="grid g-2-1">
+    <div class="card">
+      <div class="card-pad" style="padding-bottom:8px; display:flex; align-items:center">
+        <div><h3>Alertas prioritarias</h3><div class="card-sub" style="margin:0">Generadas automáticamente por plazos, criticidad y seguimiento</div></div>
+        <button class="btn btn-ghost" style="margin-left:auto" onclick="nav('alertas')">Ver todas →</button>
+      </div>
+      ${alertas.length ? alertas.map(a=>alertaHtml(a)).join("") : `<div class="empty"><b>Sin alertas activas</b>Los plazos y estándares se están cumpliendo.</div>`}
+    </div>
+    <div class="card card-pad">
+      <h3>Gestión — cumplimiento</h3><div class="card-sub">Estándares operativos del período</div>
+      ${medidor("1ª atención ≤ 72 h", cumpl)}
+      ${medidor("Casos actualizados (≤ "+DIAS_SIN_ACTUALIZAR+" días)", pct(abiertos.filter(c=>diasEntre(c.actualizado,hoy())<=DIAS_SIN_ACTUALIZAR).length, abiertos.length||1))}
+      ${medidor("Derivaciones concretadas", pct(cs.flatMap(c=>c.derivaciones).filter(d=>d.estado==="Concretada").length, cs.flatMap(c=>c.derivaciones).length||1))}
+      ${medidor("Fichas de atención completas", (()=>{ const base = cs.filter(c=>["atencion","seguimiento","cerrado"].includes(c.estado)); return Math.min(100, pct(base.filter(c=>c.fichas.psicosocial||c.fichas.juridico).length, base.length||1)); })())}
+      <div class="hint" style="margin-top:10px">Brechas registradas en el período: <b style="color:var(--ink-1)">${cs.reduce((a,c)=>a+c.brechas.length,0)}</b></div>
+    </div>
+  </div>`;
+}
+function medidor(n, v){
+  const col = v>=80 ? "var(--good)" : v>=60 ? "var(--warning)" : "var(--critical)";
+  const track = v>=80 ? "color-mix(in srgb, var(--good) 18%, transparent)" : v>=60 ? "color-mix(in srgb, var(--warning) 18%, transparent)" : "color-mix(in srgb, var(--critical) 15%, transparent)";
+  return `<div style="margin-bottom:12px">
+    <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px"><span style="color:var(--ink-2); font-weight:550">${esc(n)}</span><b style="font-variant-numeric:tabular-nums">${v}%</b></div>
+    <div class="progressbar" style="background:${track}"><div style="width:${v}%; background:${col}"></div></div>
+  </div>`;
+}
+function alertaHtml(a){
+  return `<div class="alert-item">
+    ${sevIcono(a.sev)}
+    <div style="min-width:0">
+      <div class="ai-t">${esc(a.t)} <span class="chip chip-outline" style="margin-left:4px">${SEV_N[a.sev]}</span></div>
+      <div class="ai-d">${esc(a.d)}</div>
+      <div class="ai-meta">${esc(a.caso.codigo)} · ${esc(a.caso.nombre)} · ${esc(a.caso.comuna)}</div>
+    </div>
+    <button class="btn btn-ghost ai-act" onclick="abreCaso('${a.caso.id}')">Abrir caso</button>
+  </div>`;
+}
+function tiempoPromedioPrimeraAtencion(cs){
+  const con = cs.filter(c=>c.primeraAtencion);
+  if(!con.length) return 0;
+  return con.reduce((a,c)=> a + (c.primeraAtencion - c.fechaDerivacion)/DAY, 0)/con.length;
+}
+function cumplimientoEstandar(cs){
+  const con = cs.filter(c=>c.primeraAtencion);
+  if(!con.length) return 0;
+  return pct(con.filter(c=> (c.primeraAtencion - c.fechaDerivacion)/36e5 <= ESTANDAR_PRIMERA_ATENCION_HRS).length, con.length);
+}
+
+/* ==================== VISTA: LISTADO DE CASOS ==================== */
+function vCasos(el){
+  const u = S.user;
+  const f = S.filtros;
+  let cs = casosVisibles();
+  if(f.comuna) cs = cs.filter(c=>c.comuna===f.comuna);
+  if(f.estado) cs = cs.filter(c=>c.estado===f.estado);
+  if(f.delito) cs = cs.filter(c=>c.delito===f.delito);
+  if(f.prio) cs = cs.filter(c=>c.prioridad.nivel===f.prio);
+  if(f.q){ const q=f.q.toLowerCase(); cs = cs.filter(c=>c.codigo.toLowerCase().includes(q)||c.nombre.toLowerCase().includes(q)||normRut(c.rut).toLowerCase().includes(normRut(q).toLowerCase())); }
+  el.innerHTML = `
+  <div class="page-head">
+    <div><h2>Casos</h2><p class="pg-sub">${u.rol==="profesional" ? "Casos de tus comunas asignadas y bajo tu responsabilidad" : u.rol==="coordinador" ? "Todos los casos de tus comunas asignadas" : "Todos los casos del programa"}</p></div>
+    <div class="actions"><button class="btn btn-secondary" onclick="exportaCasos()">${I.descarga} Exportar Excel</button><button class="btn btn-primary" onclick="nav('nuevo')">${I.nuevo} Ingresar caso</button></div>
+  </div>
+  <div class="card">
+    <div class="card-pad" style="padding-bottom:0">
+      <div class="filters-row">
+        <input type="search" placeholder="Buscar código, nombre o RUT…" value="${esc(f.q||"")}" oninput="S.filtros.q=this.value; refresca()" style="min-width:200px" aria-label="Buscar">
+        <select onchange="S.filtros.comuna=this.value; refresca()" aria-label="Filtrar por comuna"><option value="">Comuna (todas)</option>${comunasDe(u).map(c=>`<option ${f.comuna===c?"selected":""}>${c}</option>`).join("")}</select>
+        <select onchange="S.filtros.estado=this.value; refresca()" aria-label="Filtrar por estado"><option value="">Estado (todos)</option>${ESTADOS.map(e=>`<option value="${e.id}" ${f.estado===e.id?"selected":""}>${e.n}</option>`).join("")}</select>
+        <select onchange="S.filtros.delito=this.value; refresca()" aria-label="Filtrar por delito"><option value="">Delito (todos)</option>${DELITOS.map(d=>`<option value="${d.id}" ${f.delito===d.id?"selected":""}>${d.n}</option>`).join("")}</select>
+        <select onchange="S.filtros.prio=this.value; refresca()" aria-label="Filtrar por priorización"><option value="">Priorización (todas)</option><option ${f.prio==="Alta"?"selected":""}>Alta</option><option ${f.prio==="Media"?"selected":""}>Media</option><option ${f.prio==="Baja"?"selected":""}>Baja</option></select>
+        <span class="spacer"></span>
+        <span class="count-note">${fmtN(cs.length)} caso(s)</span>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="dt">
+        <thead><tr><th>Código</th><th>Persona usuaria</th><th>Comuna</th><th>Delito</th><th>Priorización</th><th>Estado</th><th>Derivación</th><th>Últ. actualización</th></tr></thead>
+        <tbody>
+          ${cs.slice(0,80).map(c=>`
+          <tr class="rowlink" onclick="abreCaso('${c.id}')" tabindex="0" onkeydown="if(event.key==='Enter')abreCaso('${c.id}')">
+            <td><span class="td-main" style="font-variant-numeric:tabular-nums">${c.codigo}</span></td>
+            <td><span class="td-main">${esc(c.nombre)}</span><br><span class="td-sub">${esc(c.rut)} · ${c.edad} años · ${esc(c.genero)}</span></td>
+            <td>${esc(c.comuna)}</td>
+            <td>${esc(DELITOS.find(d=>d.id===c.delito).n)}</td>
+            <td>${prioChip(c.prioridad)}</td>
+            <td>${estadoChip(c.estado)}</td>
+            <td class="num">${fdate(c.fechaDerivacion)}</td>
+            <td class="num">${fdate(c.actualizado)}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+      ${cs.length>80?`<div class="empty">Mostrando 80 de ${fmtN(cs.length)} — usa los filtros para acotar.</div>`:""}
+      ${!cs.length?`<div class="empty"><b>Sin casos con estos filtros</b>Ajusta los filtros o registra un nuevo ingreso.</div>`:""}
+    </div>
+  </div>`;
+}
+function refresca(){ renderApp(); const inp=$("#content input[type=search]"); if(inp && S.filtros.q!==undefined){ inp.focus(); const v=inp.value; inp.setSelectionRange(v.length,v.length);} }
+
+/* ==================== VISTA: NUEVO CASO (punto 2.1 BT) ==================== */
+function vNuevoCaso(el){
+  const u = S.user;
+  el.innerHTML = `
+  <div class="page-head">
+    <div><h2>Ingreso de caso</h2><p class="pg-sub">Registro único de personas usuarias — genera código de caso e índice de priorización automático</p></div>
+    <div class="actions"><button class="btn btn-secondary" onclick="nav('carga')" ${u.rol==="profesional"?"disabled title='Disponible para coordinación y equipo central'":""}>${I.carga} Carga masiva</button></div>
+  </div>
+  <form id="form-caso" novalidate>
+  <div class="grid g-2-1">
+    <div>
+      <fieldset class="fs"><legend>1 · Datos básicos</legend>
+        <div class="form-grid">
+          <div class="field full"><label class="req" for="f-nombre">Nombre completo</label><input id="f-nombre" required autocomplete="off"></div>
+          <div class="field"><label class="req" for="f-rut">RUT o identificador</label><input id="f-rut" placeholder="12.345.678-9" required><div class="hint">Migrantes sin RUN: pasaporte u otro identificador.</div></div>
+          <div class="field"><label class="req" for="f-edad">Edad</label><input id="f-edad" type="number" min="0" max="120" required></div>
+          <div class="field"><label class="req" for="f-genero">Género</label><select id="f-genero" required><option value="">Seleccionar…</option><option>Femenino</option><option>Masculino</option><option>No binario</option><option>Prefiere no decir</option></select></div>
+          <div class="field"><label for="f-triage">Triage psicológico inicial</label><select id="f-triage"><option>Leve</option><option>Moderado</option><option>Urgencia</option></select></div>
+        </div>
+      </fieldset>
+      <fieldset class="fs"><legend>2 · Datos de contacto</legend>
+        <div class="form-grid">
+          <div class="field"><label class="req" for="f-fono">Teléfono</label><input id="f-fono" placeholder="+56 9 …" required></div>
+          <div class="field"><label for="f-mail">Correo electrónico</label><input id="f-mail" type="email"></div>
+          <div class="field full"><label class="req" for="f-dir">Dirección</label><input id="f-dir" required></div>
+          <div class="field"><label class="req" for="f-comuna">Comuna</label><select id="f-comuna" required><option value="">Seleccionar…</option>${comunasDe(u).map(c=>`<option>${c}</option>`).join("")}</select><div class="hint">Solo tus comunas asignadas.</div></div>
+        </div>
+      </fieldset>
+      <fieldset class="fs"><legend>3 · Grupos prioritarios</legend>
+        <div class="check-row">${GRUPOS_PRIORITARIOS.map(g=>`<label class="checkbox-pill"><input type="checkbox" name="grupo" value="${g.id}"><span>${g.n}</span></label>`).join("")}</div>
+      </fieldset>
+      <fieldset class="fs"><legend>4 · Antecedentes del delito</legend>
+        <div class="form-grid">
+          <div class="field"><label class="req" for="f-delito">Tipo de delito</label><select id="f-delito" required><option value="">Seleccionar…</option>${DELITOS.map(d=>`<option value="${d.id}">${d.n}</option>`).join("")}</select></div>
+          <div class="field"><label class="req" for="f-fdelito">Fecha del delito</label><input id="f-fdelito" type="date" required></div>
+          <div class="field"><label class="req" for="f-fderiv">Fecha de derivación</label><input id="f-fderiv" type="date" required></div>
+          <div class="field"><label class="req" for="f-canal">Canal de derivación</label><select id="f-canal" required><option value="">Seleccionar…</option>${CANALES.map(c=>`<option>${c}</option>`).join("")}</select></div>
+        </div>
+      </fieldset>
+      <fieldset class="fs"><legend>5 · Situaciones de priorización</legend>
+        <div class="check-row">${SIT_PRIORIZACION.map(s=>`<label class="checkbox-pill"><input type="checkbox" name="sit" value="${s.id}"><span>${s.n} (+${s.pts})</span></label>`).join("")}</div>
+      </fieldset>
+      <fieldset class="fs"><legend>6 · Consentimiento</legend>
+        <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px; color:var(--ink-2)">
+          <input type="checkbox" id="f-consent" style="margin-top:3px">
+          <span>La persona usuaria otorga su <b>consentimiento informado de primer contacto</b> para el registro y tratamiento de sus datos personales y sensibles, conforme a la normativa de protección de datos personales vigente.</span>
+        </label>
+      </fieldset>
+      <div style="display:flex; gap:10px; justify-content:flex-end">
+        <button type="button" class="btn btn-secondary" onclick="nav('casos')">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Registrar caso</button>
+      </div>
+    </div>
+    <div>
+      <div class="card card-pad" style="position:sticky; top:76px">
+        <h3>Índice de priorización</h3><div class="card-sub">Se calcula automáticamente según el baremo del programa (puntos 3 y 8, Bases Técnicas)</div>
+        <div id="prio-preview">
+          <div class="st-value" style="font-size:34px">— <span style="font-size:14px; color:var(--ink-3)">pts</span></div>
+          <div class="hint">Completa delito y situaciones para calcular.</div>
+        </div>
+        <hr style="border:none; border-top:1px solid var(--grid); margin:14px 0">
+        <div class="hint">${I.shield} El código único de caso se genera al registrar y permite trazabilidad en todo el sistema. Los campos marcados con * son obligatorios: el sistema impide avanzar sin ellos.</div>
+      </div>
+    </div>
+  </div>
+  </form>`;
+
+  const form = $("#form-caso");
+  const preview = ()=>{
+    const c = leeFormCaso(false);
+    const p = calculaPriorizacion(c);
+    const col = p.nivel==="Alta"?"var(--critical)":p.nivel==="Media"?"var(--serious)":"var(--good)";
+    $("#prio-preview").innerHTML = `
+      <div class="st-value" style="font-size:34px">${p.pts} <span style="font-size:14px; color:var(--ink-3)">pts</span></div>
+      <div style="margin:6px 0 10px"><span class="chip" style="background:color-mix(in srgb, ${col} 12%, transparent); color:${col}; border-color:color-mix(in srgb, ${col} 30%, transparent)">Priorización ${p.nivel}</span></div>
+      ${p.detalle.length?`<div style="font-size:12px; color:var(--ink-2)">${p.detalle.map(d=>`<div style="display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px dashed var(--grid)"><span>${esc(d[0])}</span><b>+${d[1]}</b></div>`).join("")}</div>`:`<div class="hint">Sin factores registrados aún.</div>`}
+      ${p.nivel==="Alta"?`<div class="banner crit" style="margin:12px 0 0; padding:9px 12px"><span><b style="display:inline">Alerta automática:</b> el caso ingresará con prioridad alta y notificará a la triada.</span></div>`:""}`;
+  };
+  form.addEventListener("input", preview);
+  form.addEventListener("change", preview);
+  form.onsubmit = (e)=>{
+    e.preventDefault();
+    const req = [["f-nombre","Nombre"],["f-rut","RUT"],["f-edad","Edad"],["f-genero","Género"],["f-fono","Teléfono"],["f-dir","Dirección"],["f-comuna","Comuna"],["f-delito","Tipo de delito"],["f-fdelito","Fecha del delito"],["f-fderiv","Fecha de derivación"],["f-canal","Canal"]];
+    let falta = [];
+    req.forEach(([id,n])=>{
+      const f = $("#"+id); const ok = f.value.trim()!=="";
+      f.closest(".field").classList.toggle("invalid", !ok);
+      if(!ok) falta.push(n);
+    });
+    if(falta.length){ toast("Faltan campos obligatorios", falta.join(", "), "err"); return; }
+    if(!validaRut($("#f-rut").value) && /^[0-9.]+-?[\dkK]$/.test($("#f-rut").value.trim())){ $("#f-rut").closest(".field").classList.add("invalid"); toast("RUT inválido","Revisa el dígito verificador.","err"); return; }
+    if(!$("#f-consent").checked){ toast("Consentimiento requerido","Debes registrar el consentimiento informado de primer contacto.","err"); return; }
+    const c = leeFormCaso(true);
+    c.prioridad = calculaPriorizacion(c);
+    c.historial.push({estado:"derivado", t:new Date(), por:S.user.nombre, nota:"Ingreso manual · canal "+c.canal});
+    cambiarEstado(c, "ingresado", S.user.nombre, "Registro con consentimiento de primer contacto");
+    c.primeraAtencion = new Date();
+    DB.casos.unshift(c);
+    logAcceso(S.user, "Ingreso de caso", c.codigo+" · "+c.comuna);
+    registraOperacion("Ingreso "+c.codigo);
+    toast("Caso registrado: "+c.codigo, "Índice de priorización "+c.prioridad.nivel+" ("+c.prioridad.pts+" pts). "+(c.prioridad.nivel==="Alta"?"Se generó alerta de criticidad.":""));
+    abreCaso(c.id);
+  };
+}
+function leeFormCaso(final){
+  const v = id => ($("#"+id)?.value||"").trim();
+  const c = {
+    id: final ? "c"+(DB.casos.length+1)+"-"+Date.now().toString(36) : "tmp",
+    codigo: null,
+    nombre: v("f-nombre"), rut: v("f-rut"), edad: v("f-edad")?parseInt(v("f-edad"),10):"", genero: v("f-genero"),
+    telefono: v("f-fono"), email: v("f-mail"), direccion: v("f-dir"), comuna: v("f-comuna"),
+    grupos: $$("input[name=grupo]:checked").map(x=>x.value),
+    situaciones: $$("input[name=sit]:checked").map(x=>x.value),
+    delito: v("f-delito"), canal: v("f-canal"), triage: v("f-triage")||"Leve",
+    fechaDelito: v("f-fdelito")?new Date(v("f-fdelito")+"T12:00"):null,
+    fechaDerivacion: v("f-fderiv")?new Date(v("f-fderiv")+"T12:00"):new Date(),
+    responsable: S.user.id, estado:"derivado", historial:[], creado:new Date(), actualizado:new Date(),
+    fichas:{psicosocial:null,juridico:null}, sesiones:[], derivaciones:[], brechas:[],
+    consent1Contacto:true, consent1Visita:false, egreso:null, satisfaccion:null, reingresos:0,
+    primeraAtencion:null,
+  };
+  if(final) c.codigo = nuevoCodigo(c.fechaDerivacion||new Date());
+  return c;
+}
+
+/* ==================== VISTA: DETALLE DE CASO ==================== */
+function vDetalle(el){
+  const c = DB.casos.find(x=>x.id===S.casoAbierto);
+  if(!c){ nav("casos"); return; }
+  const u = S.user;
+  const puedeEditar = u.rol!=="profesional" || c.responsable===u.id || comunasDe(u).includes(c.comuna);
+  const tab = S.tabDetalle || "resumen";
+  const est = ESTADOS.find(e=>e.id===c.estado);
+  el.innerHTML = `
+  <div class="page-head">
+    <div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+        <h2 style="font-variant-numeric:tabular-nums">${c.codigo}</h2>
+        ${estadoChip(c.estado)} ${prioChip(c.prioridad)}
+        ${c.triage==="Urgencia"?`<span class="chip" style="background:color-mix(in srgb,var(--critical) 12%,transparent);color:var(--critical);border-color:color-mix(in srgb,var(--critical) 30%,transparent)">⚠ Triage: urgencia</span>`:""}
+      </div>
+      <p class="pg-sub">${esc(c.nombre)} · ${esc(c.comuna)} · ${esc(DELITOS.find(d=>d.id===c.delito).n)} · Responsable: ${esc(USUARIOS_SISTEMA.find(x=>x.id===c.responsable)?.nombre || "Triada móvil")}</p>
+    </div>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="nav('casos')">← Volver</button>
+      ${puedeEditar && !["cerrado","egreso_adm"].includes(c.estado) ? `<button class="btn btn-secondary" onclick="modalEstado('${c.id}')">Cambiar estado</button><button class="btn btn-primary" onclick="modalEgreso('${c.id}')">Registrar egreso</button>` : ""}
+      ${["cerrado","egreso_adm"].includes(c.estado) ? `<button class="btn btn-secondary" onclick="reingresa('${c.id}')">Registrar reingreso</button>` : ""}
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    ${[["resumen","Resumen"],["ficha","Ficha de atención"],["sesiones","Sesiones ("+c.sesiones.length+")"],["derivaciones","Derivaciones ("+c.derivaciones.length+")"],["historial","Historial de estados"]].map(([id,n])=>`<button role="tab" class="tab ${tab===id?"active":""}" onclick="S.tabDetalle='${id}'; renderApp()">${n}</button>`).join("")}
+  </div>
+  <div id="tab-body"></div>`;
+  const body = $("#tab-body");
+  if(tab==="resumen") tabResumen(body, c);
+  else if(tab==="ficha") tabFicha(body, c, puedeEditar);
+  else if(tab==="sesiones") tabSesiones(body, c, puedeEditar);
+  else if(tab==="derivaciones") tabDerivaciones(body, c, puedeEditar);
+  else tabHistorial(body, c);
+}
+function tabResumen(el, c){
+  const g = c.grupos.map(id=>GRUPOS_PRIORITARIOS.find(x=>x.id===id)?.n).filter(Boolean);
+  const s = c.situaciones.map(id=>SIT_PRIORIZACION.find(x=>x.id===id)?.n).filter(Boolean);
+  el.innerHTML = `
+  <div class="grid g-2">
+    <div class="card card-pad">
+      <h3>Datos de la persona usuaria</h3><div class="card-sub">Registro único — módulo 2.1 Bases Técnicas</div>
+      <dl class="kv">
+        <dt>Nombre</dt><dd>${esc(c.nombre)}</dd>
+        <dt>RUT / identificador</dt><dd>${esc(c.rut)}</dd>
+        <dt>Edad · género</dt><dd>${c.edad} años · ${esc(c.genero)}</dd>
+        <dt>Teléfono</dt><dd>${esc(c.telefono)}</dd>
+        <dt>Correo</dt><dd>${esc(c.email||"—")}</dd>
+        <dt>Dirección</dt><dd>${esc(c.direccion)}, ${esc(c.comuna)}</dd>
+        <dt>Grupos prioritarios</dt><dd>${g.length?g.map(x=>`<span class="chip chip-outline" style="margin:1px 2px 1px 0">${esc(x)}</span>`).join(""):"—"}</dd>
+      </dl>
+    </div>
+    <div class="card card-pad">
+      <h3>Antecedentes del caso</h3><div class="card-sub">Trazabilidad desde la derivación</div>
+      <dl class="kv">
+        <dt>Delito</dt><dd>${esc(DELITOS.find(d=>d.id===c.delito).n)}</dd>
+        <dt>Fecha del delito</dt><dd>${fdate(c.fechaDelito)}</dd>
+        <dt>Derivación</dt><dd>${fdate(c.fechaDerivacion)} · ${esc(c.canal)}</dd>
+        <dt>1ª atención</dt><dd>${c.primeraAtencion ? fdate(c.primeraAtencion,true) + (((c.primeraAtencion-c.fechaDerivacion)/36e5)<=ESTANDAR_PRIMERA_ATENCION_HRS ? ` <span class="chip" style="color:var(--good-text);background:color-mix(in srgb,var(--good) 12%,transparent);border-color:transparent">${Math.round((c.primeraAtencion-c.fechaDerivacion)/36e5)} h — dentro del estándar</span>` : ` <span class="chip" style="color:var(--critical);background:color-mix(in srgb,var(--critical) 10%,transparent);border-color:transparent">fuera del estándar 72 h</span>`) : "Pendiente"}</dd>
+        <dt>Situaciones</dt><dd>${s.length?s.join(" · "):"—"}</dd>
+        <dt>Índice priorización</dt><dd>${c.prioridad.nivel} — ${c.prioridad.pts} puntos</dd>
+        <dt>Consentimientos</dt><dd>1er contacto: ${c.consent1Contacto?"✔ registrado":"✘ pendiente"} · 1ª visita: ${c.consent1Visita?"✔ registrado":"✘ pendiente"}</dd>
+        <dt>Última actualización</dt><dd>${fdate(c.actualizado,true)}</dd>
+        ${c.egreso?`<dt>Egreso</dt><dd>${esc(c.egreso.glosa)} (${fdate(c.egreso.t)})${c.satisfaccion?` · Satisfacción: ${c.satisfaccion}/7`:""}</dd>`:""}
+      </dl>
+      ${c.brechas.length?`<div class="banner warn" style="margin-top:12px"><div><b>Brechas registradas (${c.brechas.length})</b>${c.brechas.map(b=>`<span>· ${esc(b.detalle)} (${fdate(b.t)})</span><br>`).join("")}</div></div>`:""}
+    </div>
+  </div>`;
+}
+
+/* --- Ficha de atención (punto 2.3 BT): obligatoriedad y diferenciación --- */
+function tabFicha(el, c, puedeEditar){
+  const tipos = [["psicosocial","Ficha psicosocial","Profesional psicosocial (psicólogo/a · trabajador/a social)"],["juridico","Ficha jurídica","Profesional jurídico (abogado/a)"]];
+  el.innerHTML = `<div class="banner info"><div><b>Ficha estructurada obligatoria, diferenciada por tipo de profesional</b><span>El sistema impide avanzar de etapa (seguimiento o egreso) si los campos obligatorios no han sido completados.</span></div></div>
+  <div class="grid g-2">${tipos.map(([id,titulo,quien])=>{
+    const f = c.fichas[id];
+    return `<div class="card card-pad">
+      <h3>${titulo}</h3><div class="card-sub">${quien}</div>
+      ${f ? `
+        <dl class="kv">
+          <dt>Estado</dt><dd><span class="chip" style="color:var(--good-text);background:color-mix(in srgb,var(--good) 12%,transparent);border-color:transparent">${I.check} Completa</span></dd>
+          <dt>Profesional</dt><dd>${esc(f.profesional)}</dd>
+          <dt>Fecha</dt><dd>${fdate(f.t,true)}</dd>
+          <dt>Evaluación inicial</dt><dd>${esc(f.evaluacion)}</dd>
+          <dt>Intervención</dt><dd>${esc(f.intervencion)}</dd>
+          <dt>Plan de acción</dt><dd>${f.plan.sesiones} sesiones proyectadas — ${esc(f.plan.foco)}</dd>
+        </dl>
+        ${puedeEditar?`<button class="btn btn-secondary" style="margin-top:12px" onclick="modalFicha('${c.id}','${id}')">Editar ficha</button>`:""}`
+      : `
+        <div class="empty" style="padding:22px 8px"><b>Ficha pendiente</b>Requerida para avanzar de etapa.</div>
+        ${puedeEditar?`<button class="btn btn-primary btn-block" onclick="modalFicha('${c.id}','${id}')">Completar ficha</button>`:""}`}
+    </div>`;}).join("")}
+  </div>`;
+}
+function modalFicha(cid, tipo){
+  const c = DB.casos.find(x=>x.id===cid);
+  const f = c.fichas[tipo];
+  abreModal(`
+    <div class="modal-head"><h3>${tipo==="psicosocial"?"Ficha psicosocial":"Ficha jurídica"} — ${c.codigo}</h3><button class="icon-btn x" aria-label="Cerrar">${I.x}</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field full"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="ff-c1" ${c.consent1Contacto?"checked":""}> Consentimiento informado de 1er contacto</label></div>
+        <div class="field full"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="ff-c2" ${c.consent1Visita?"checked":""}> Consentimiento informado de 1ª visita</label></div>
+        <div class="field full"><label class="req" for="ff-eval">Evaluación inicial (ficha establecida)</label><textarea id="ff-eval" rows="3">${esc(f?.evaluacion||"")}</textarea></div>
+        <div class="field"><label class="req" for="ff-int">Tipo de intervención (estandarizada)</label><select id="ff-int"><option value="">Seleccionar…</option>${TIPOS_INTERVENCION.map(t=>`<option ${f?.intervencion===t?"selected":""}>${t}</option>`).join("")}</select></div>
+        <div class="field"><label class="req" for="ff-nses">Plan de acción — N° de sesiones proyectadas</label><input id="ff-nses" type="number" min="1" max="20" value="${f?.plan?.sesiones||""}"></div>
+        <div class="field full"><label class="req" for="ff-foco">Plan de acción — foco</label><input id="ff-foco" value="${esc(f?.plan?.foco||"")}"></div>
+      </div>
+      <p class="hint">${I.shield} Campos * obligatorios. La ficha queda asociada al profesional y con marca de fecha y hora (trazabilidad).</p>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" onclick="cierraModal()">Cancelar</button><button class="btn btn-primary" id="ff-save">Guardar ficha</button></div>`);
+  $("#ff-save").onclick = ()=>{
+    const eva=$("#ff-eval").value.trim(), int=$("#ff-int").value, nses=parseInt($("#ff-nses").value,10), foco=$("#ff-foco").value.trim();
+    if(!eva||!int||!nses||!foco){ toast("Campos obligatorios incompletos","La ficha no puede guardarse incompleta.","err"); return; }
+    if(!$("#ff-c1").checked){ toast("Consentimiento requerido","Registra el consentimiento de 1er contacto.","err"); return; }
+    c.consent1Contacto = true; c.consent1Visita = $("#ff-c2").checked;
+    c.fichas[tipo] = {completa:true, profesional:S.user.nombre, t:new Date(), evaluacion:eva, intervencion:int, plan:{sesiones:nses, foco}};
+    if(!c.primeraAtencion){ c.primeraAtencion = new Date(); }
+    if(c.estado==="derivado"||c.estado==="ingresado") cambiarEstado(c,"atencion",S.user.nombre,"Ficha de atención completada");
+    c.actualizado = new Date();
+    logAcceso(S.user,"Ficha de atención",c.codigo+" · "+tipo);
+    registraOperacion("Ficha "+c.codigo);
+    cierraModal(); toast("Ficha guardada","El caso avanzó a estado En atención."); renderApp();
+  };
+}
+
+function tabSesiones(el, c, puedeEditar){
+  el.innerHTML = `
+  <div class="card">
+    <div class="card-pad" style="display:flex; align-items:center; padding-bottom:10px">
+      <div><h3>Registro de sesiones y contactos</h3><div class="card-sub" style="margin:0">Seguimiento, visitas, egresos, visitas fallidas</div></div>
+      ${puedeEditar?`<button class="btn btn-primary" style="margin-left:auto" onclick="modalSesion('${c.id}')">${I.nuevo} Registrar sesión</button>`:""}
+    </div>
+    ${c.sesiones.length ? `<div class="table-scroll"><table class="dt"><thead><tr><th>Fecha</th><th>Tipo de intervención</th><th>Profesional</th><th>Resultado</th><th>Nota</th></tr></thead><tbody>
+      ${[...c.sesiones].sort((a,b)=>b.t-a.t).map(s=>`<tr><td class="num">${fdate(s.t,true)}</td><td>${esc(s.tipo)}</td><td>${esc(s.profesional)}</td><td>${s.resultado==="Realizada"?`<span class="chip" style="color:var(--good-text);background:color-mix(in srgb,var(--good) 12%,transparent);border-color:transparent">Realizada</span>`:`<span class="chip chip-outline">${esc(s.resultado)}</span>`}</td><td style="color:var(--ink-2)">${esc(s.nota)}</td></tr>`).join("")}
+    </tbody></table></div>` : `<div class="empty"><b>Sin sesiones registradas</b>Registra el primer contacto o visita.</div>`}
+  </div>`;
+}
+function modalSesion(cid){
+  const c = DB.casos.find(x=>x.id===cid);
+  abreModal(`
+    <div class="modal-head"><h3>Registrar sesión — ${c.codigo}</h3><button class="icon-btn x" aria-label="Cerrar">${I.x}</button></div>
+    <div class="modal-body"><div class="form-grid">
+      <div class="field"><label class="req">Tipo de intervención</label><select id="fs-tipo">${TIPOS_INTERVENCION.map(t=>`<option>${t}</option>`).join("")}</select></div>
+      <div class="field"><label class="req">Resultado</label><select id="fs-res"><option>Realizada</option><option>Visita fallida</option><option>Reagendada</option><option>Contacto telefónico</option></select></div>
+      <div class="field full"><label>Nota</label><textarea id="fs-nota" rows="3" placeholder="Registro breve de la sesión…"></textarea></div>
+    </div></div>
+    <div class="modal-foot"><button class="btn btn-secondary" onclick="cierraModal()">Cancelar</button><button class="btn btn-primary" id="fs-save">Guardar</button></div>`, {size:"sm"});
+  $("#fs-save").onclick = ()=>{
+    c.sesiones.push({t:new Date(), tipo:$("#fs-tipo").value, profesional:S.user.nombre, resultado:$("#fs-res").value, nota:$("#fs-nota").value.trim()});
+    c.actualizado = new Date();
+    if(!c.primeraAtencion) c.primeraAtencion = new Date();
+    logAcceso(S.user,"Registro de sesión",c.codigo);
+    registraOperacion("Sesión "+c.codigo);
+    cierraModal(); toast("Sesión registrada"); renderApp();
+  };
+}
+
+function tabDerivaciones(el, c, puedeEditar){
+  el.innerHTML = `
+  <div class="banner info"><div><b>Módulo de derivación con trazabilidad institucional</b><span>Cada derivación genera folio, institución de destino, motivo y estado de concreción.</span></div></div>
+  <div class="card">
+    <div class="card-pad" style="display:flex; align-items:center; padding-bottom:10px">
+      <div><h3>Derivaciones del caso</h3><div class="card-sub" style="margin:0">Según protocolos definidos con la red institucional</div></div>
+      ${puedeEditar?`<button class="btn btn-primary" style="margin-left:auto" onclick="modalDerivacion('${c.id}')">${I.deriv} Derivar caso</button>`:""}
+    </div>
+    ${c.derivaciones.length ? `<div class="table-scroll"><table class="dt"><thead><tr><th>Folio</th><th>Fecha</th><th>Institución</th><th>Motivo</th><th>Estado</th><th>Registrado por</th><th></th></tr></thead><tbody>
+      ${[...c.derivaciones].sort((a,b)=>b.t-a.t).map((d,i)=>`<tr>
+        <td style="font-variant-numeric:tabular-nums"><b>${esc(d.folio)}</b></td><td class="num">${fdate(d.t)}</td><td>${esc(d.institucion)}</td><td style="color:var(--ink-2)">${esc(d.motivo)}</td>
+        <td>${d.estado==="Concretada"?`<span class="chip" style="color:var(--good-text);background:color-mix(in srgb,var(--good) 12%,transparent);border-color:transparent">${I.check} Concretada</span>`: d.estado==="Pendiente"?`<span class="chip" style="color:#8a6100;background:color-mix(in srgb,var(--warning) 18%,transparent);border-color:transparent">● Pendiente</span>`:`<span class="chip" style="color:var(--critical);background:color-mix(in srgb,var(--critical) 10%,transparent);border-color:transparent">✘ No concretada</span>`}</td>
+        <td style="color:var(--ink-2)">${esc(d.por||"—")}</td>
+        <td>${puedeEditar && d.estado!=="Concretada" ? `<button class="btn btn-ghost" onclick="marcaDerivacion('${c.id}',${c.derivaciones.indexOf(d)})">Marcar concretada</button>`:""}</td>
+      </tr>`).join("")}
+    </tbody></table></div>` : `<div class="empty"><b>Sin derivaciones</b>Deriva el caso a la red institucional cuando corresponda.</div>`}
+  </div>`;
+}
+function modalDerivacion(cid){
+  const c = DB.casos.find(x=>x.id===cid);
+  abreModal(`
+    <div class="modal-head"><h3>Derivar caso — ${c.codigo}</h3><button class="icon-btn x" aria-label="Cerrar">${I.x}</button></div>
+    <div class="modal-body"><div class="form-grid">
+      <div class="field"><label class="req">Institución de destino</label><select id="fd-inst">${INSTITUCIONES.map(i=>`<option>${i}</option>`).join("")}</select></div>
+      <div class="field"><label class="req">Motivo</label><select id="fd-motivo"><option>Atención reparatoria especializada</option><option>Patrocinio jurídico</option><option>Salud mental</option><option>Apoyo social</option><option>Protección</option></select></div>
+      <div class="field full"><label>Observaciones para la institución</label><textarea id="fd-obs" rows="3"></textarea></div>
+    </div><p class="hint">La derivación queda con folio único y trazabilidad institucional; su estado se actualiza a Concretada o No concretada según confirmación de la red.</p></div>
+    <div class="modal-foot"><button class="btn btn-secondary" onclick="cierraModal()">Cancelar</button><button class="btn btn-primary" id="fd-save">Emitir derivación</button></div>`, {size:"sm"});
+  $("#fd-save").onclick = ()=>{
+    const folio = "DER-"+String(1000+DB.casos.flatMap(x=>x.derivaciones).length+1);
+    c.derivaciones.push({t:new Date(), institucion:$("#fd-inst").value, motivo:$("#fd-motivo").value, estado:"Pendiente", folio, por:S.user.nombre, obs:$("#fd-obs").value.trim()});
+    c.actualizado = new Date();
+    logAcceso(S.user,"Derivación emitida",c.codigo+" → "+$("#fd-inst").value);
+    registraOperacion("Derivación "+folio);
+    cierraModal(); toast("Derivación emitida: "+folio, "Queda en estado Pendiente hasta confirmación institucional."); renderApp();
+  };
+}
+function marcaDerivacion(cid, idx){
+  const c = DB.casos.find(x=>x.id===cid);
+  c.derivaciones[idx].estado = "Concretada"; c.actualizado = new Date();
+  logAcceso(S.user,"Derivación concretada",c.codigo+" · "+c.derivaciones[idx].folio);
+  toast("Derivación concretada"); renderApp();
+}
+
+function tabHistorial(el, c){
+  el.innerHTML = `
+  <div class="card card-pad">
+    <h3>Trazabilidad de estados</h3><div class="card-sub">Cada cambio queda con fecha, hora y profesional responsable (punto 2.2 BT)</div>
+    <div class="timeline" style="margin-top:14px">
+      ${[...c.historial].reverse().map(h=>{
+        const e = ESTADOS.find(x=>x.id===h.estado);
+        return `<div class="tl-item" style="--c:${e.tono}">
+          <div class="tl-title">${e.n}</div>
+          <div class="tl-meta">${fdate(h.t,true)} · ${esc(h.por)}</div>
+          ${h.nota?`<div class="tl-body">${esc(h.nota)}</div>`:""}
+        </div>`;}).join("")}
+    </div>
+  </div>`;
+}
+
+/* --- cambio de estado, egreso y reingreso --- */
+function modalEstado(cid){
+  const c = DB.casos.find(x=>x.id===cid);
+  const posibles = ESTADOS.filter(e=>!["cerrado","egreso_adm","reingreso"].includes(e.id) && e.id!==c.estado);
+  abreModal(`
+    <div class="modal-head"><h3>Cambiar estado — ${c.codigo}</h3><button class="icon-btn x" aria-label="Cerrar">${I.x}</button></div>
+    <div class="modal-body">
+      <div class="field"><label class="req">Nuevo estado</label><select id="fe-est">${posibles.map(e=>`<option value="${e.id}">${e.n}</option>`).join("")}</select></div>
+      <div class="field"><label>Nota</label><input id="fe-nota" placeholder="Motivo del cambio…"></div>
+      <p class="hint" id="fe-aviso"></p>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" onclick="cierraModal()">Cancelar</button><button class="btn btn-primary" id="fe-save">Aplicar cambio</button></div>`, {size:"sm"});
+  $("#fe-save").onclick = ()=>{
+    const nuevo = $("#fe-est").value;
+    if(["seguimiento"].includes(nuevo) && !c.fichas.psicosocial && !c.fichas.juridico){
+      toast("Ficha de atención pendiente","No puedes avanzar a seguimiento sin completar la ficha estructurada obligatoria.","err"); return;
+    }
+    cambiarEstado(c, nuevo, S.user.nombre, $("#fe-nota").value.trim());
+    if(nuevo==="brecha" && S.user.rol!=="profesional"){ c.brechas.push({t:new Date(), detalle:$("#fe-nota").value.trim()||"Brecha registrada", por:S.user.nombre}); }
+    logAcceso(S.user,"Cambio de estado",c.codigo+" → "+nuevo);
+    registraOperacion("Estado "+c.codigo);
+    cierraModal(); toast("Estado actualizado", ESTADOS.find(e=>e.id===nuevo).n); renderApp();
+  };
+}
+function modalEgreso(cid){
+  const c = DB.casos.find(x=>x.id===cid);
+  abreModal(`
+    <div class="modal-head"><h3>Registrar egreso — ${c.codigo}</h3><button class="icon-btn x" aria-label="Cerrar">${I.x}</button></div>
+    <div class="modal-body">
+      <div class="field"><label class="req">Categoría de egreso</label><select id="fg-tipo">${EGRESOS.map(e=>`<option value="${e.id}">${e.n}</option>`).join("")}</select></div>
+      <div class="field"><label>Observaciones del cierre</label><textarea id="fg-obs" rows="3"></textarea></div>
+      <label style="display:flex;gap:9px;align-items:center;font-size:13px;color:var(--ink-2);margin-bottom:8px"><input type="checkbox" id="fg-informe" checked> Emitir informe interno de cierre</label>
+      <div id="fg-encuesta-wrap">
+        <div class="field"><label>Encuesta de satisfacción (1–7)</label><select id="fg-encuesta"><option value="">Aplicar después</option>${[7,6,5,4,3,2,1].map(n=>`<option>${n}</option>`).join("")}</select><div class="hint">Aplicable en egresos por derivación efectiva, cumplimiento del plan o egreso voluntario.</div></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" onclick="cierraModal()">Cancelar</button><button class="btn btn-primary" id="fg-save">Registrar egreso</button></div>`, {size:"sm"});
+  const chk = ()=>{ const t = parseInt($("#fg-tipo").value,10); $("#fg-encuesta-wrap").style.display = EGRESOS.find(e=>e.id===t).encuesta ? "" : "none"; };
+  $("#fg-tipo").onchange = chk; chk();
+  $("#fg-save").onclick = ()=>{
+    const t = parseInt($("#fg-tipo").value,10); const eg = EGRESOS.find(e=>e.id===t);
+    if(t!==4 && !c.fichas.psicosocial && !c.fichas.juridico){ toast("Ficha de atención pendiente","El cierre técnico requiere la ficha estructurada completa.","err"); return; }
+    cambiarEstado(c, t===4?"egreso_adm":"cerrado", S.user.nombre, "Egreso: "+eg.n+($("#fg-obs").value.trim()?" — "+$("#fg-obs").value.trim():""));
+    c.egreso = {tipo:t, glosa:eg.n, t:new Date(), informe:$("#fg-informe").checked};
+    const enc = $("#fg-encuesta").value;
+    if(eg.encuesta && enc){ c.satisfaccion = parseInt(enc,10); DB.encuestas.push({caso:c.id, nota:c.satisfaccion, t:new Date()}); }
+    logAcceso(S.user,"Egreso de caso",c.codigo+" · tipo "+t);
+    registraOperacion("Egreso "+c.codigo);
+    cierraModal(); toast("Egreso registrado", ($("#fg-informe").checked?"Informe interno de cierre emitido. ":"")+(eg.encuesta&&enc?"Encuesta de satisfacción registrada.":"")); renderApp();
+  };
+}
+function reingresa(cid){
+  const c = DB.casos.find(x=>x.id===cid);
+  cambiarEstado(c, "reingreso", S.user.nombre, "Reingreso por nueva solicitud de atención");
+  c.reingresos = (c.reingresos||0)+1;
+  logAcceso(S.user,"Reingreso",c.codigo);
+  toast("Reingreso registrado","Se generó alerta de seguimiento para la triada.","warn");
+  renderApp();
+}
+
+/* ==================== VISTA: CARGA MASIVA (punto 2.1 BT) ==================== */
+const PLANTILLA_COLS = ["nombre","rut","edad","genero","telefono","direccion","comuna","email","tipo_delito","fecha_delito","fecha_derivacion","canal_derivacion","grupos_prioritarios","situaciones_priorizacion"];
+let XLSX_LIB = null;
+function cargaXLSX(){
+  if(XLSX_LIB) return Promise.resolve(XLSX_LIB);
+  return new Promise((res)=>{
+    const s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+    s.onload = ()=>{ XLSX_LIB = window.XLSX; res(XLSX_LIB); };
+    s.onerror = ()=> res(null);
+    document.head.appendChild(s);
+  });
+}
+function vCarga(el){
+  el.innerHTML = `
+  <div class="page-head">
+    <div><h2>Carga masiva de casos</h2><p class="pg-sub">Importación desde Excel (.xlsx) o CSV según plantilla predefinida — con validación previa y reporte de inconsistencias</p></div>
+    <div class="actions"><button class="btn btn-secondary" onclick="descargaPlantilla()">${I.descarga} Descargar plantilla</button></div>
+  </div>
+  <div class="grid g-2-1">
+    <div>
+      <div class="card card-pad">
+        <div class="dropzone" id="dz" tabindex="0" role="button" aria-label="Seleccionar archivo para carga masiva">
+          <b>Arrastra aquí el archivo Excel o CSV</b>
+          o haz clic para seleccionarlo
+          <div class="hint">Formatos: .xlsx · .csv — máx. 5.000 filas por carga. Debe seguir la plantilla oficial.</div>
+        </div>
+        <input type="file" id="dz-file" accept=".xlsx,.xls,.csv" style="display:none">
+        <div id="carga-result"></div>
+      </div>
+    </div>
+    <div class="card card-pad">
+      <h3>Plantilla predefinida</h3><div class="card-sub">Columnas requeridas por el sistema</div>
+      <ol style="padding-left:20px; font-size:12.5px; color:var(--ink-2); display:flex; flex-direction:column; gap:4px">
+        ${PLANTILLA_COLS.map(c=>`<li><code style="background:var(--wash);border-radius:4px;padding:1px 6px">${c}</code></li>`).join("")}
+      </ol>
+      <div class="hint" style="margin-top:10px">El validador detecta: RUT inválido o duplicado, comuna fuera de las 36 priorizadas, delito no catalogado, fechas mal formateadas y campos obligatorios vacíos. Solo se cargan las filas válidas tras tu confirmación.</div>
+    </div>
+  </div>`;
+  const dz = $("#dz"), fi = $("#dz-file");
+  dz.onclick = ()=> fi.click();
+  dz.onkeydown = e=>{ if(e.key==="Enter"||e.key===" ") fi.click(); };
+  ["dragover","dragenter"].forEach(ev=> dz.addEventListener(ev, e=>{ e.preventDefault(); dz.classList.add("over"); }));
+  ["dragleave","drop"].forEach(ev=> dz.addEventListener(ev, e=>{ e.preventDefault(); dz.classList.remove("over"); }));
+  dz.addEventListener("drop", e=>{ const f = e.dataTransfer.files[0]; if(f) procesaArchivo(f); });
+  fi.onchange = ()=>{ if(fi.files[0]) procesaArchivo(fi.files[0]); };
+}
+async function procesaArchivo(file){
+  const out = $("#carga-result");
+  out.innerHTML = `<div class="banner info" style="margin-top:16px"><div><b>Procesando ${esc(file.name)}…</b><span>Validando estructura y contenido contra la plantilla.</span></div></div>`;
+  let filas = [];
+  try{
+    if(/\.csv$/i.test(file.name)){
+      const txt = await file.text();
+      filas = parseCSV(txt);
+    } else {
+      const lib = await cargaXLSX();
+      if(!lib){ out.innerHTML = `<div class="banner warn" style="margin-top:16px"><div><b>Sin conexión al lector de Excel</b><span>No se pudo cargar la librería XLSX (CDN). Usa la plantilla CSV o reintenta con conexión.</span></div></div>`; return; }
+      const buf = await file.arrayBuffer();
+      const wb = lib.read(buf, {type:"array", cellDates:true});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      filas = lib.utils.sheet_to_json(ws, {defval:"", raw:false});
+    }
+  } catch(err){
+    out.innerHTML = `<div class="banner crit" style="margin-top:16px"><div><b>No se pudo leer el archivo</b><span>${esc(err.message)}</span></div></div>`; return;
+  }
+  if(!filas.length){ out.innerHTML = `<div class="banner warn" style="margin-top:16px"><div><b>Archivo vacío</b><span>No se encontraron filas de datos.</span></div></div>`; return; }
+  const {validas, errores} = validaFilas(filas);
+  out.innerHTML = `
+    <div class="grid g-3" style="margin-top:16px; margin-bottom:14px">
+      <div class="card stat-tile" style="box-shadow:none"><span class="st-label">Filas leídas</span><span class="st-value" style="font-size:24px">${fmtN(filas.length)}</span></div>
+      <div class="card stat-tile" style="box-shadow:none"><span class="st-label">Válidas</span><span class="st-value" style="font-size:24px; color:var(--good-text)">${fmtN(validas.length)}</span></div>
+      <div class="card stat-tile" style="box-shadow:none"><span class="st-label">Con inconsistencias</span><span class="st-value" style="font-size:24px; color:${errores.length?"var(--critical)":"var(--good-text)"}">${fmtN(errores.length)}</span></div>
+    </div>
+    ${errores.length?`
+    <h3 style="font-size:13.5px; margin-bottom:8px">Reporte de inconsistencias (previo a la carga definitiva)</h3>
+    <div class="table-scroll" style="max-height:260px; overflow-y:auto; border:1px solid var(--grid); border-radius:10px">
+      <table class="dt"><thead><tr><th>Fila</th><th>Campo</th><th>Problema</th><th>Valor</th></tr></thead><tbody>
+        ${errores.slice(0,120).map(e=>`<tr><td class="num">${e.fila}</td><td><code>${esc(e.campo)}</code></td><td style="color:var(--critical)">${esc(e.problema)}</td><td style="color:var(--ink-2)">${esc(String(e.valor).slice(0,40))}</td></tr>`).join("")}
+      </tbody></table>
+    </div>
+    <div style="display:flex; gap:8px; margin-top:10px"><button class="btn btn-ghost" onclick="descargaErrores()">${I.descarga} Descargar reporte de inconsistencias</button></div>`:""}
+    <div style="display:flex; gap:10px; margin-top:16px; align-items:center">
+      <button class="btn btn-primary" id="btn-confirma-carga" ${validas.length?"":"disabled"}>Confirmar carga de ${fmtN(validas.length)} caso(s) válido(s)</button>
+      <span class="hint">Las filas con inconsistencias no se cargan; corrígelas y vuelve a importar.</span>
+    </div>`;
+  window._cargaPendiente = {validas, errores};
+  $("#btn-confirma-carga").onclick = ()=>{
+    const {validas} = window._cargaPendiente;
+    validas.forEach(v=>{ DB.casos.unshift(v); });
+    logAcceso(S.user, "Carga masiva", validas.length+" casos importados desde "+file.name);
+    registraOperacion("Carga masiva ("+validas.length+")");
+    toast("Carga completada", validas.length+" casos importados con código único asignado.");
+    nav("casos");
+  };
+}
+function parseCSV(txt){
+  const sep = txt.includes(";") && !txt.split("\n")[0].includes(",") ? ";" : ",";
+  const lineas = txt.replace(/\r/g,"").split("\n").filter(l=>l.trim());
+  const head = lineas[0].split(sep).map(h=>h.trim().toLowerCase());
+  return lineas.slice(1).map(l=>{
+    const vals = l.split(sep); const o = {};
+    head.forEach((h,i)=> o[h] = (vals[i]||"").trim());
+    return o;
+  });
+}
+function validaFilas(filas){
+  const validas = [], errores = [];
+  const rutsExistentes = new Set(DB.casos.map(c=>normRut(c.rut)));
+  const rutsArchivo = new Set();
+  filas.forEach((f,idx)=>{
+    const nf = idx+2; /* fila en el archivo, contando encabezado */
+    const g = k => String(f[k] ?? f[k?.toUpperCase()] ?? "").trim();
+    const errsFila = [];
+    const nombre = g("nombre"), rut = g("rut"), comuna = g("comuna");
+    if(!nombre) errsFila.push({campo:"nombre", problema:"Obligatorio vacío", valor:""});
+    if(!rut) errsFila.push({campo:"rut", problema:"Obligatorio vacío", valor:""});
+    else if(/^[0-9.\s]+-?[\dkK]$/.test(rut) && !validaRut(rut)) errsFila.push({campo:"rut", problema:"Dígito verificador inválido", valor:rut});
+    else if(rutsExistentes.has(normRut(rut)) ) errsFila.push({campo:"rut", problema:"Ya existe un caso con este RUT (posible duplicado)", valor:rut});
+    else if(rutsArchivo.has(normRut(rut))) errsFila.push({campo:"rut", problema:"RUT duplicado dentro del archivo", valor:rut});
+    const comunaOk = COMUNAS.find(c=>c.toLowerCase()===comuna.toLowerCase());
+    if(!comunaOk) errsFila.push({campo:"comuna", problema:"Comuna no está entre las 36 priorizadas", valor:comuna});
+    const delitoTx = g("tipo_delito");
+    const delito = DELITOS.find(d=>d.n.toLowerCase()===delitoTx.toLowerCase() || d.id===delitoTx.toLowerCase());
+    if(!delito) errsFila.push({campo:"tipo_delito", problema:"Delito no catalogado", valor:delitoTx});
+    const edad = parseInt(g("edad"),10);
+    if(g("edad") && (isNaN(edad)||edad<0||edad>120)) errsFila.push({campo:"edad", problema:"Edad fuera de rango", valor:g("edad")});
+    const fDeriv = parseFecha(g("fecha_derivacion"));
+    if(g("fecha_derivacion") && !fDeriv) errsFila.push({campo:"fecha_derivacion", problema:"Fecha ilegible (usar AAAA-MM-DD o DD-MM-AAAA)", valor:g("fecha_derivacion")});
+    const fDel = parseFecha(g("fecha_delito"));
+    if(errsFila.length){ errsFila.forEach(e=> errores.push({fila:nf, ...e})); return; }
+    rutsArchivo.add(normRut(rut));
+    const gruposTx = g("grupos_prioritarios").split(/[;,|]/).map(x=>x.trim().toLowerCase()).filter(Boolean);
+    const grupos = GRUPOS_PRIORITARIOS.filter(gp=> gruposTx.some(t=> gp.n.toLowerCase().includes(t)||gp.id===t)).map(gp=>gp.id);
+    const sitTx = g("situaciones_priorizacion").split(/[;,|]/).map(x=>x.trim().toLowerCase()).filter(Boolean);
+    const situaciones = SIT_PRIORIZACION.filter(sp=> sitTx.some(t=> sp.n.toLowerCase().includes(t)||sp.id===t)).map(sp=>sp.id);
+    const c = {
+      id:"cm"+Date.now().toString(36)+idx, codigo:null,
+      nombre, rut, edad: isNaN(edad)?"":edad, genero: g("genero")||"Prefiere no decir",
+      telefono:g("telefono"), email:g("email"), direccion:g("direccion"), comuna:comunaOk,
+      grupos, situaciones, delito:delito.id, canal:g("canal_derivacion")||"Carga masiva",
+      triage:"Leve",
+      fechaDelito:fDel||fDeriv||new Date(), fechaDerivacion:fDeriv||new Date(),
+      responsable:S.user.id, estado:"derivado",
+      historial:[{estado:"derivado", t:new Date(), por:S.user.nombre+" (carga masiva)", nota:""}],
+      creado:new Date(), actualizado:new Date(),
+      fichas:{psicosocial:null,juridico:null}, sesiones:[], derivaciones:[], brechas:[],
+      consent1Contacto:false, consent1Visita:false, egreso:null, satisfaccion:null, reingresos:0, primeraAtencion:null,
+    };
+    c.prioridad = calculaPriorizacion(c);
+    c.codigo = nuevoCodigo(c.fechaDerivacion);
+    validas.push(c);
+  });
+  return {validas, errores};
+}
+function parseFecha(s){
+  if(!s) return null;
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if(m) return new Date(+m[1], m[2]-1, +m[3], 12);
+  m = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/); if(m) return new Date(+m[3], m[2]-1, +m[1], 12);
+  const d = new Date(s); return isNaN(d) ? null : d;
+}
+function descargaArchivo(nombre, contenido, mime="text/csv"){
+  const blob = new Blob(["﻿"+contenido], {type:mime+";charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = nombre; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 3000);
+}
+function descargaPlantilla(){
+  const ejemplo = ["María Ejemplo Soto","12.345.678-5","34","Femenino","+56 9 5555 5555","Av. Ejemplo 123","La Pintana","maria@correo.cl","Robo con violencia","2026-07-10","2026-07-11","Carabineros de Chile","migrante","riesgo vital"];
+  descargaArchivo("plantilla_carga_masiva_estamos_contigo.csv", PLANTILLA_COLS.join(";")+"\n"+ejemplo.join(";"));
+  toast("Plantilla descargada","CSV compatible con Excel (separador ;). También se acepta .xlsx con estas columnas.");
+}
+function descargaErrores(){
+  const {errores} = window._cargaPendiente||{errores:[]};
+  descargaArchivo("reporte_inconsistencias.csv", "fila;campo;problema;valor\n"+errores.map(e=>[e.fila,e.campo,e.problema,String(e.valor).replace(/;/g,",")].join(";")).join("\n"));
+}
+function exportaCasos(){
+  const cs = casosVisibles();
+  const head = ["codigo","nombre","rut","edad","genero","comuna","delito","priorizacion","puntaje","estado","fecha_derivacion","canal","primera_atencion","ultima_actualizacion","satisfaccion"];
+  const filas = cs.map(c=>[c.codigo,c.nombre,c.rut,c.edad,c.genero,c.comuna,DELITOS.find(d=>d.id===c.delito).n,c.prioridad.nivel,c.prioridad.pts,ESTADOS.find(e=>e.id===c.estado).n,fdate(c.fechaDerivacion),c.canal,c.primeraAtencion?fdate(c.primeraAtencion):"",fdate(c.actualizado),c.satisfaccion||""]);
+  cargaXLSX().then(lib=>{
+    if(lib){
+      const ws = lib.utils.aoa_to_sheet([head, ...filas]);
+      ws["!cols"] = head.map((h,i)=>({wch: i===1?28: i===0?13: 14}));
+      const wb = lib.utils.book_new(); lib.utils.book_append_sheet(wb, ws, "Casos");
+      lib.writeFile(wb, "casos_estamos_contigo.xlsx");
+    } else {
+      descargaArchivo("casos_estamos_contigo.csv", head.join(";")+"\n"+filas.map(f=>f.join(";")).join("\n"));
+    }
+    logAcceso(S.user,"Exportación de casos", cs.length+" registros");
+    toast("Exportación generada", cs.length+" casos exportados.");
+  });
+}
+
+/* ==================== VISTA: ALERTAS (punto 2.5 BT) ==================== */
+function vAlertas(el){
+  const todas = calcAlertas();
+  const f = S.filtroAlerta || "todas";
+  const cats = [["todas","Todas"],["gestion","a) Gestión de casos"],["criticidad","b) Criticidad"],["seguimiento","c) Seguimiento"]];
+  const lista = f==="todas" ? todas : todas.filter(a=>a.cat===f);
+  el.innerHTML = `
+  <div class="page-head">
+    <div><h2>Alertas automáticas</h2><p class="pg-sub">Configuradas por plazos e índices — gestión, criticidad y seguimiento</p></div>
+    <div class="actions">
+      <span class="chip" style="background:color-mix(in srgb,var(--critical) 10%,transparent);color:var(--critical);border-color:transparent">${todas.filter(a=>a.sev==="critical").length} críticas</span>
+      <span class="chip" style="background:color-mix(in srgb,var(--serious) 14%,transparent);color:var(--serious);border-color:transparent">${todas.filter(a=>a.sev==="serious").length} serias</span>
+      <span class="chip" style="background:color-mix(in srgb,var(--warning) 18%,transparent);color:#8a6100;border-color:transparent">${todas.filter(a=>a.sev==="warning").length} preventivas</span>
+    </div>
+  </div>
+  <div class="filters-row">
+    ${cats.map(([id,n])=>`<button class="btn ${f===id?"btn-primary":"btn-secondary"}" onclick="S.filtroAlerta='${id}'; renderApp()">${n} ${id!=="todas"?`(${todas.filter(a=>a.cat===id).length})`:`(${todas.length})`}</button>`).join("")}
+  </div>
+  <div class="card">
+    ${lista.length ? lista.map(a=>alertaHtml(a)).join("") : `<div class="empty"><b>Sin alertas en esta categoría</b>Los plazos y estándares se están cumpliendo.</div>`}
+  </div>
+  <p class="hint" style="margin-top:12px">${I.shield} Los umbrales (48 h para ingreso, ${ESTANDAR_PRIMERA_ATENCION_HRS} h para primera atención, ${DIAS_SIN_ACTUALIZAR} días sin actualización, 10 días para derivaciones pendientes) son configurables por la Secretaría Ejecutiva en Administración.</p>`;
+}
+
+/* ==================== VISTA: DERIVACIONES ==================== */
+function vDerivaciones(el){
+  const cs = casosVisibles();
+  const der = cs.flatMap(c=> c.derivaciones.map(d=>({...d, caso:c})));
+  der.sort((a,b)=>b.t-a.t);
+  const conc = der.filter(d=>d.estado==="Concretada").length;
+  el.innerHTML = `
+  <div class="page-head">
+    <div><h2>Derivaciones</h2><p class="pg-sub">Módulo de derivación con trazabilidad institucional</p></div>
+  </div>
+  <div class="grid g-3" style="margin-bottom:16px">
+    <div class="card stat-tile"><span class="st-label">Derivaciones emitidas</span><span class="st-value">${fmtN(der.length)}</span></div>
+    <div class="card stat-tile"><span class="st-label">Tasa de derivación efectiva</span><span class="st-value">${pct(conc,der.length)}%</span><div class="progressbar" style="margin-top:6px"><div style="width:${pct(conc,der.length)}%"></div></div></div>
+    <div class="card stat-tile"><span class="st-label">No concretadas / pendientes</span><span class="st-value">${fmtN(der.length-conc)}</span><span class="st-foot">Generan alerta de seguimiento</span></div>
+  </div>
+  <div class="card">
+    <div class="table-scroll"><table class="dt">
+      <thead><tr><th>Folio</th><th>Fecha</th><th>Caso</th><th>Institución</th><th>Motivo</th><th>Estado</th></tr></thead>
+      <tbody>${der.slice(0,60).map(d=>`<tr class="rowlink" onclick="abreCaso('${d.caso.id}')">
+        <td style="font-variant-numeric:tabular-nums"><b>${esc(d.folio)}</b></td><td class="num">${fdate(d.t)}</td>
+        <td><span class="td-main">${esc(d.caso.codigo)}</span><br><span class="td-sub">${esc(d.caso.nombre)} · ${esc(d.caso.comuna)}</span></td>
+        <td>${esc(d.institucion)}</td><td style="color:var(--ink-2)">${esc(d.motivo)}</td>
+        <td>${d.estado==="Concretada"?`<span class="chip" style="color:var(--good-text);background:color-mix(in srgb,var(--good) 12%,transparent);border-color:transparent">${I.check} Concretada</span>`: d.estado==="Pendiente"?`<span class="chip" style="color:#8a6100;background:color-mix(in srgb,var(--warning) 18%,transparent);border-color:transparent">● Pendiente</span>`:`<span class="chip" style="color:var(--critical);background:color-mix(in srgb,var(--critical) 10%,transparent);border-color:transparent">✘ No concretada</span>`}</td>
+      </tr>`).join("")}</tbody>
+    </table>
+    ${!der.length?`<div class="empty"><b>Sin derivaciones registradas</b></div>`:""}</div>
+  </div>`;
+}
+
+/* ==================== VISTA: REPORTES MENSUALES (punto 2.7 BT) ==================== */
+function indicadoresMes(cs, mkey){
+  const delMes = cs.filter(c=> mesKey(c.fechaDerivacion)===mkey);
+  const atendidos = delMes.filter(c=>c.primeraAtencion);
+  const der = delMes.flatMap(c=>c.derivaciones);
+  const cerrados = cs.filter(c=> c.egreso && mesKey(c.egreso.t)===mkey);
+  const activosMes = cs.filter(c=> mesKey(c.fechaDerivacion)<=mkey && (!c.egreso || mesKey(c.egreso.t)>=mkey));
+  return {
+    ingresos: delMes.length,
+    cobertura: pct(atendidos.length, delMes.length),
+    coberturaMeta: Math.min(100, pct(delMes.length, Math.round(META_MENSUAL* (delMes.length? Math.max(delMes.length/ META_MENSUAL,0.001):0.001)) || 1)),
+    tPrimera: tiempoPromedioPrimeraAtencion(delMes),
+    tasaDerivacion: pct(der.filter(d=>d.estado==="Concretada").length, der.length||1),
+    nDeriv: der.length,
+    tasaCierre: pct(cerrados.length, activosMes.length||1),
+    nCierres: cerrados.length,
+    cumplimiento: cumplimientoEstandar(delMes),
+    satisfaccion: (()=>{ const s = cerrados.filter(c=>c.satisfaccion); return s.length ? (s.reduce((a,c)=>a+c.satisfaccion,0)/s.length) : null; })(),
+  };
+}
+function vReportes(el){
+  const meses = ultimosMeses(6);
+  const sel = S.mesReporte || meses[meses.length-1].key;
+  const cs = casosVisibles();
+  const ind = indicadoresMes(cs, sel);
+  const mesObj = meses.find(m=>m.key===sel) || meses[meses.length-1];
+  const serie = meses.map(m=>{ const i = indicadoresMes(cs, m.key); return {n:m.n, ingresos:i.ingresos, cierre:i.nCierres}; });
+  el.innerHTML = `
+  <div class="page-head">
+    <div><h2>Reportes mensuales automatizados</h2><p class="pg-sub">Indicadores del programa — exportables en PDF y Excel</p></div>
+    <div class="actions">
+      <select onchange="S.mesReporte=this.value; renderApp()" aria-label="Mes del reporte">${meses.map(m=>`<option value="${m.key}" ${m.key===sel?"selected":""}>${cap(fmes(m.date))}</option>`).join("")}</select>
+      <button class="btn btn-secondary" onclick="exportaReporteXLSX('${sel}')">${I.descarga} Excel</button>
+      <button class="btn btn-primary" onclick="window.print()">${I.print} PDF / Imprimir</button>
+    </div>
+  </div>
+  <div class="print-only" style="margin-bottom:18px">
+    <h2 style="font-size:18px">Programa Estamos Contigo — Reporte mensual ${cap(fmes(mesObj.date))}</h2>
+    <p style="color:var(--ink-2); font-size:12px">Componente N°1 Primera Respuesta · Defensoría a Víctimas de Delitos Violentos · GORE Región Metropolitana de Santiago<br>Generado automáticamente el ${fdate(hoy(),true)} · Usuario: ${esc(S.user.nombre)} (${ROLES[S.user.rol].n})</p>
+  </div>
+  <div class="grid g-3" style="margin-bottom:16px">
+    <div class="card stat-tile"><span class="st-label">Cobertura del programa</span><span class="st-value">${ind.cobertura}%</span><span class="st-foot">${fmtN(ind.ingresos)} ingresos del mes con atención iniciada</span><div class="progressbar" style="margin-top:6px"><div style="width:${ind.cobertura}%"></div></div></div>
+    <div class="card stat-tile"><span class="st-label">Tiempo promedio 1ª atención</span><span class="st-value">${ind.tPrimera?ind.tPrimera.toFixed(1):"—"} <span style="font-size:14px;color:var(--ink-3)">días</span></span><span class="st-foot">Estándar: dentro de ${ESTANDAR_PRIMERA_ATENCION_HRS} h desde la derivación</span></div>
+    <div class="card stat-tile"><span class="st-label">Tasa de derivación efectiva</span><span class="st-value">${ind.tasaDerivacion}%</span><span class="st-foot">${fmtN(ind.nDeriv)} derivaciones emitidas en el mes</span><div class="progressbar" style="margin-top:6px"><div style="width:${ind.tasaDerivacion}%"></div></div></div>
+    <div class="card stat-tile"><span class="st-label">Tasa de cierre de casos</span><span class="st-value">${ind.tasaCierre}%</span><span class="st-foot">${fmtN(ind.nCierres)} egresos en el mes</span><div class="progressbar" style="margin-top:6px"><div style="width:${ind.tasaCierre}%"></div></div></div>
+    <div class="card stat-tile"><span class="st-label">Cumplimiento de estándares</span><span class="st-value">${ind.cumplimiento}%</span><span class="st-foot">1ª atención dentro del estándar de ${ESTANDAR_PRIMERA_ATENCION_HRS} h</span><div class="progressbar" style="margin-top:6px"><div style="width:${ind.cumplimiento}%"></div></div></div>
+    <div class="card stat-tile"><span class="st-label">Satisfacción usuaria</span><span class="st-value">${ind.satisfaccion?ind.satisfaccion.toFixed(1):"—"} <span style="font-size:14px;color:var(--ink-3)">/ 7</span></span><span class="st-foot">Encuestas aplicadas al egreso (cuando es viable)</span></div>
+  </div>
+  <div class="grid g-2">
+    <div class="card card-pad">
+      <h3>Evolución — ingresos y cierres</h3><div class="card-sub">Últimos 6 meses</div>
+      ${chartLine(serie, {series:[{k:"ingresos",n:"Ingresos"},{k:"cierre",n:"Cierres"}]})}
+      ${legendHtml([{n:"Ingresos"},{n:"Cierres"}])}
+    </div>
+    <div class="card card-pad">
+      <h3>Detalle del período</h3><div class="card-sub">${cap(fmes(mesObj.date))}</div>
+      <div class="table-scroll"><table class="dt">
+        <thead><tr><th>Indicador</th><th class="num">Valor</th></tr></thead>
+        <tbody>
+          <tr><td>Casos ingresados en el mes</td><td class="num"><b>${fmtN(ind.ingresos)}</b></td></tr>
+          <tr><td>Cobertura del programa (atendidos / ingresados)</td><td class="num"><b>${ind.cobertura}%</b></td></tr>
+          <tr><td>Tiempo promedio de primera atención</td><td class="num"><b>${ind.tPrimera?ind.tPrimera.toFixed(1)+" días":"—"}</b></td></tr>
+          <tr><td>Tasa de derivación efectiva</td><td class="num"><b>${ind.tasaDerivacion}%</b></td></tr>
+          <tr><td>Tasa de cierre de casos</td><td class="num"><b>${ind.tasaCierre}%</b></td></tr>
+          <tr><td>Cumplimiento de estándares de atención</td><td class="num"><b>${ind.cumplimiento}%</b></td></tr>
+          <tr><td>Índice de satisfacción (1–7)</td><td class="num"><b>${ind.satisfaccion?ind.satisfaccion.toFixed(1):"—"}</b></td></tr>
+        </tbody>
+      </table></div>
+      <p class="hint" style="margin-top:10px">En producción el reporte se genera y distribuye automáticamente el primer día hábil de cada mes (PDF y Excel) al equipo central y coordinaciones.</p>
+    </div>
+  </div>`;
+}
+function exportaReporteXLSX(mkey){
+  const cs = casosVisibles();
+  const ind = indicadoresMes(cs, mkey);
+  const filas = [
+    ["Programa Estamos Contigo — Reporte mensual", mkey],
+    ["Generado", fdate(hoy(),true)],
+    [],
+    ["Indicador","Valor"],
+    ["Casos ingresados", ind.ingresos],
+    ["Cobertura del programa (%)", ind.cobertura],
+    ["Tiempo promedio 1a atencion (dias)", ind.tPrimera?+ind.tPrimera.toFixed(1):""],
+    ["Tasa de derivacion efectiva (%)", ind.tasaDerivacion],
+    ["Tasa de cierre de casos (%)", ind.tasaCierre],
+    ["Cumplimiento de estandares (%)", ind.cumplimiento],
+    ["Satisfaccion usuaria (1-7)", ind.satisfaccion?+ind.satisfaccion.toFixed(1):""],
+  ];
+  cargaXLSX().then(lib=>{
+    if(lib){
+      const ws = lib.utils.aoa_to_sheet(filas); ws["!cols"]=[{wch:44},{wch:16}];
+      const wb = lib.utils.book_new(); lib.utils.book_append_sheet(wb, ws, "Reporte "+mkey);
+      lib.writeFile(wb, "reporte_mensual_"+mkey+".xlsx");
+    } else descargaArchivo("reporte_mensual_"+mkey+".csv", filas.map(f=>f.join(";")).join("\n"));
+    logAcceso(S.user,"Exportación de reporte", mkey);
+    toast("Reporte exportado", "Reporte "+mkey+" generado.");
+  });
+}
+
+/* ==================== VISTA: TABLERO EJECUTIVO (punto 2.8 BT) ==================== */
+function vTablero(el){
+  const u = S.user;
+  const cs = casosVisibles();
+  const filas = comunasDe(u).map(cm=>{
+    const cc = cs.filter(c=>c.comuna===cm);
+    if(!cc.length) return null;
+    const conAt = cc.filter(c=>c.primeraAtencion);
+    const sat = cc.filter(c=>c.satisfaccion);
+    return {
+      comuna:cm, total:cc.length,
+      cobertura: pct(conAt.length, cc.length),
+      t1a: conAt.length ? (conAt.reduce((a,c)=>a+(c.primeraAtencion-c.fechaDerivacion)/36e5,0)/conAt.length) : null,
+      seguimiento: cc.filter(c=>c.estado==="seguimiento").length,
+      finalizados: cc.filter(c=>["cerrado","egreso_adm"].includes(c.estado)).length,
+      satisfaccion: sat.length ? sat.reduce((a,c)=>a+c.satisfaccion,0)/sat.length : null,
+      criticos: cc.filter(c=>c.prioridad.nivel==="Alta" && !["cerrado","egreso_adm"].includes(c.estado)).length,
+    };
+  }).filter(Boolean).sort((a,b)=>b.total-a.total);
+  el.innerHTML = `
+  <div class="page-head">
+    <div><h2>Tablero ejecutivo por comuna</h2><p class="pg-sub">Automatizado — cobertura, tiempos de primera respuesta, seguimiento, finalizados y satisfacción</p></div>
+    <div class="actions"><button class="btn btn-secondary" onclick="window.print()">${I.print} PDF</button></div>
+  </div>
+  <div class="card">
+    <div class="table-scroll"><table class="dt">
+      <thead><tr><th>Comuna</th><th class="num">Casos</th><th class="num">Cobertura</th><th class="num">T° 1ª respuesta</th><th class="num">En seguimiento</th><th class="num">Finalizados</th><th class="num">Satisfacción</th><th class="num">Críticos activos</th></tr></thead>
+      <tbody>${filas.map(f=>`<tr>
+        <td><span class="td-main">${esc(f.comuna)}</span></td>
+        <td class="num"><b>${fmtN(f.total)}</b></td>
+        <td class="num"><div style="display:flex;align-items:center;gap:8px;justify-content:flex-end"><span style="font-variant-numeric:tabular-nums">${f.cobertura}%</span><span class="progressbar" style="width:56px"><span style="display:block;height:100%;border-radius:99px;width:${f.cobertura}%;background:${f.cobertura>=80?"var(--good)":f.cobertura>=60?"var(--warning)":"var(--critical)"}"></span></span></div></td>
+        <td class="num">${f.t1a!=null ? (f.t1a<=ESTANDAR_PRIMERA_ATENCION_HRS ? `<span style="color:var(--good-text);font-weight:650">${Math.round(f.t1a)} h</span>` : `<span style="color:var(--critical);font-weight:650">${Math.round(f.t1a)} h</span>`) : "—"}</td>
+        <td class="num">${fmtN(f.seguimiento)}</td>
+        <td class="num">${fmtN(f.finalizados)}</td>
+        <td class="num">${f.satisfaccion?`<b>${f.satisfaccion.toFixed(1)}</b> <span style="color:var(--ink-3)">/ 7</span>`:"—"}</td>
+        <td class="num">${f.criticos?`<span class="chip" style="color:var(--critical);background:color-mix(in srgb,var(--critical) 10%,transparent);border-color:transparent">${f.criticos}</span>`:"0"}</td>
+      </tr>`).join("")}</tbody>
+    </table></div>
+  </div>
+  <p class="hint" style="margin-top:12px">Tiempo de 1ª respuesta en horas promedio desde la derivación; en verde si cumple el estándar de ${ESTANDAR_PRIMERA_ATENCION_HRS} h. La satisfacción proviene de las encuestas aplicadas al egreso.</p>`;
+}
+
+/* ==================== VISTA: VISUALIZACIÓN TERRITORIAL (punto 2.9 BT) ==================== */
+function vViz(el){
+  const u = S.user;
+  const cs = casosVisibles();
+  const porComuna = comunasDe(u).map(cm=>({n:cm, v: cs.filter(c=>c.comuna===cm).length}));
+  const max = Math.max(...porComuna.map(x=>x.v), 1);
+  const meses = ultimosMeses(6);
+  const serie = meses.map(m=>({n:m.n, v: cs.filter(c=>mesKey(c.fechaDerivacion)===m.key).length}));
+  const ranking = DELITOS.map(d=>({n:d.n, v: cs.filter(c=>c.delito===d.id).length})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  el.innerHTML = `
+  <div class="page-head">
+    <div><h2>Visualización de datos</h2><p class="pg-sub">Mapa de calor por comuna · tendencia temporal · ranking de delitos</p></div>
+  </div>
+  <div class="card card-pad" style="margin-bottom:16px">
+    <h3>Mapa de calor — casos por comuna</h3><div class="card-sub">Intensidad según volumen de casos (${u.rol==="secretaria"?"36 comunas priorizadas":"tus comunas asignadas"})</div>
+    <div class="heat-grid">
+      ${porComuna.sort((a,b)=>b.v-a.v).map(c=>{
+        const bg = seqColor(c.v, max); const ink = inkPara(bg);
+        return `<div class="heat-cell mark" style="background:${bg}; color:${ink}; border-color:transparent" data-tt="${esc(c.n)}|${fmtN(c.v)} caso(s)" onclick="S.filtros={comuna:'${esc(c.n)}'}; nav('casos')" role="button" tabindex="0" aria-label="${esc(c.n)}: ${c.v} casos">
+          <span class="hc-name">${esc(c.n)}</span><span class="hc-val">${fmtN(c.v)}</span>
+        </div>`;}).join("")}
+    </div>
+    <div class="heat-scale"><span>Menos casos</span><span class="ramp"></span><span>Más casos</span><span style="margin-left:auto">En producción: capa geográfica (GeoJSON comunal) sobre mapa interactivo.</span></div>
+  </div>
+  <div class="grid g-2">
+    <div class="card card-pad">
+      <h3>Tendencia temporal</h3><div class="card-sub">Ingresos mensuales al programa</div>
+      ${chartLine(serie, {series:[{k:"v",n:"Ingresos"}]})}
+    </div>
+    <div class="card card-pad">
+      <h3>Ranking de delitos más frecuentes</h3><div class="card-sub">Casos acumulados por tipología</div>
+      ${chartBarsH(ranking, {color:"var(--s2)", labelW:150})}
+    </div>
+  </div>`;
+}
+
+/* ==================== VISTA: ADMINISTRACIÓN (Secretaría Ejecutiva) ==================== */
+function vAdmin(el){
+  const tab = S.tabAdmin || "usuarios";
+  el.innerHTML = `
+  <div class="page-head">
+    <div><h2>Administración del sistema</h2><p class="pg-sub">Gestión de usuarios, asignación de comunas y registro de accesos — solo Secretaría Ejecutiva</p></div>
+  </div>
+  <div class="tabs">
+    ${[["usuarios","Usuarios y perfiles"],["comunas","Asignación de comunas"],["accesos","Registro de accesos"],["seguridad","Seguridad de la información"]].map(([id,n])=>`<button class="tab ${tab===id?"active":""}" onclick="S.tabAdmin='${id}'; renderApp()">${n}</button>`).join("")}
+  </div>
+  <div id="admin-body"></div>`;
+  const body = $("#admin-body");
+  if(tab==="usuarios"){
+    body.innerHTML = `
+    <div class="card">
+      <div class="table-scroll"><table class="dt">
+        <thead><tr><th>Usuario</th><th>Perfil de acceso</th><th>Ámbito</th><th>Comunas asignadas</th><th>Estado</th></tr></thead>
+        <tbody>${USUARIOS_SISTEMA.map(x=>`<tr>
+          <td><div style="display:flex; gap:10px; align-items:center"><span class="avatar" style="width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:12px;background:${x.color}">${x.ini}</span><div><span class="td-main">${esc(x.nombre)}</span><br><span class="td-sub">${esc(x.cargo)}</span></div></div></td>
+          <td>${ROLES[x.rol].n}</td>
+          <td style="color:var(--ink-2); max-width:300px; font-size:12px">${ROLES[x.rol].desc}</td>
+          <td style="font-size:12px">${x.rol==="secretaria"?"Las 36 comunas":x.comunas.join(", ")}</td>
+          <td><span class="chip" style="color:var(--good-text);background:color-mix(in srgb,var(--good) 12%,transparent);border-color:transparent">Activo</span></td>
+        </tr>`).join("")}</tbody>
+      </table></div>
+    </div>
+    <p class="hint" style="margin-top:12px">${I.shield} Perfiles según punto 2.4 de las Bases Técnicas: Profesional, Coordinador/a institucional y Secretaría Ejecutiva, con control de permisos por rol y autenticación segura. En producción: alta/baja de usuarios, doble factor y política de contraseñas institucional.</p>`;
+  } else if(tab==="comunas"){
+    body.innerHTML = `
+    <div class="banner info"><div><b>Asignación de comunas a supervisores y equipos</b><span>Determina qué casos ve cada triada y coordinación. Los cambios rigen de inmediato y quedan auditados.</span></div></div>
+    <div class="card">
+      <div class="table-scroll"><table class="dt">
+        <thead><tr><th>Equipo</th><th>Comunas asignadas</th><th class="num">Casos activos</th><th></th></tr></thead>
+        <tbody>${TRIADAS.slice(0,9).map(t=>{
+          const n = DB.casos.filter(c=> t.comunas.includes(c.comuna) && !["cerrado","egreso_adm"].includes(c.estado)).length;
+          return `<tr><td><span class="td-main">${esc(t.n)}</span><br><span class="td-sub">3 profesionales (psicosocial · jurídico · gestor)</span></td>
+          <td>${t.comunas.map(c=>`<span class="chip chip-outline" style="margin:1px 3px 1px 0">${esc(c)}</span>`).join("")}</td>
+          <td class="num"><b>${n}</b></td>
+          <td><button class="btn btn-ghost" onclick="toast('Asignación de comunas','En la versión productiva se abre el editor de asignación con vigencias y respaldo auditado.','info')">Editar</button></td></tr>`;}).join("")}</tbody>
+      </table></div>
+    </div>`;
+  } else if(tab==="accesos"){
+    body.innerHTML = `
+    <div class="card">
+      <div class="card-pad" style="padding-bottom:6px"><h3>Registro de accesos y modificaciones</h3><div class="card-sub">Trazabilidad de accesos — requisito de seguridad (punto 5 BT)</div></div>
+      <div class="table-scroll"><table class="dt">
+        <thead><tr><th>Fecha y hora</th><th>Usuario</th><th>Perfil</th><th>Acción</th><th>Detalle</th></tr></thead>
+        <tbody>${DB.accesos.slice(0,40).map(a=>`<tr>
+          <td class="num">${fdate(a.t,true)}</td><td>${esc(a.usuario)}</td><td>${esc(ROLES[a.rol]?.n||a.rol)}</td><td><b>${esc(a.accion)}</b></td><td style="color:var(--ink-2)">${esc(a.detalle)}</td>
+        </tr>`).join("")}</tbody>
+      </table>
+      ${!DB.accesos.length?`<div class="empty"><b>Sin eventos aún</b></div>`:""}</div>
+    </div>`;
+  } else {
+    body.innerHTML = `
+    <div class="grid g-2">
+      <div class="card card-pad">
+        <h3>Controles implementados en esta plataforma</h3><div class="card-sub">Punto 5 de las Bases Técnicas</div>
+        ${[["Autenticación de usuarios y gestión de perfiles","Perfiles Profesional / Coordinación / Secretaría Ejecutiva con permisos diferenciados"],
+           ["Control de permisos según rol","Acceso restringido por comunas asignadas y responsabilidad de casos"],
+           ["Registro de accesos y modificaciones","Bitácora auditable de sesiones, ingresos, fichas, derivaciones y cambios de estado"],
+           ["Trazabilidad de estados","Cada cambio con fecha, hora y profesional responsable"]].map(([t,d])=>`
+          <div style="display:flex; gap:10px; margin-bottom:12px"><span style="color:var(--good-text); flex:none; margin-top:2px">${I.check}</span><div><b style="font-size:13px">${t}</b><div style="font-size:12.5px; color:var(--ink-2)">${d}</div></div></div>`).join("")}
+      </div>
+      <div class="card card-pad">
+        <h3>Controles de la versión productiva</h3><div class="card-sub">Comprometidos para el despliegue institucional</div>
+        ${[["Encriptación de datos en tránsito","HTTPS / TLS 1.3 extremo a extremo"],
+           ["Encriptación de datos sensibles en reposo","AES-256 a nivel de base de datos y respaldos"],
+           ["Cumplimiento normativa de protección de datos personales","Ley N° 19.628 y Ley N° 21.719 — minimización, consentimiento y derechos ARCO"],
+           ["Autenticación reforzada","Credenciales institucionales + MFA / ClaveÚnica; bloqueo por intentos fallidos"],
+           ["Disponibilidad ≥ 99% y respaldos automáticos","Infraestructura cloud con backup diario, RPO ≤ 24 h y RTO ≤ 4 h"],
+           ["Modo offline seguro","Datos locales cifrados en el dispositivo y sincronización firmada"]].map(([t,d])=>`
+          <div style="display:flex; gap:10px; margin-bottom:12px"><span style="color:var(--s1); flex:none; margin-top:2px">${I.shield}</span><div><b style="font-size:13px">${t}</b><div style="font-size:12.5px; color:var(--ink-2)">${d}</div></div></div>`).join("")}
+      </div>
+    </div>`;
+  }
+}
+
+/* ==================== VISTA: MANUAL DE USO ==================== */
+function vManual(el){
+  el.innerHTML = `
+  <div class="page-head"><div><h2>Manual digital de uso operativo</h2><p class="pg-sub">Guía práctica para los 60 profesionales de las 17 triadas móviles</p></div>
+  <div class="actions"><button class="btn btn-secondary" onclick="window.print()">${I.print} Descargar PDF</button></div></div>
+  <div class="card card-pad help-article" style="max-width:860px">
+    <h3>1 · Flujo general del caso</h3>
+    <p>Todo caso sigue la ruta <b>Derivado al programa → Ingresado → En atención → En seguimiento → Cerrado</b>, con los estados complementarios <i>Egreso administrativo</i>, <i>Brechas</i> y <i>Reingreso</i>. Cada cambio de estado queda registrado con fecha, hora y profesional responsable.</p>
+    <h3>2 · Ingresar un caso</h3>
+    <ol>
+      <li>Menú <b>Ingresar caso</b> → completa las 6 secciones. Los campos con asterisco son obligatorios: el sistema no permite registrar sin ellos.</li>
+      <li>El <b>índice de priorización</b> se calcula solo, según delito, situaciones de priorización, grupos prioritarios y edad. Si resulta <b>Alta</b>, se genera alerta de criticidad para la triada.</li>
+      <li>Registra el <b>consentimiento informado de primer contacto</b> antes de guardar. Al registrar se genera el <b>código único de caso</b> (EC-AAAA-NNNNN).</li>
+    </ol>
+    <h3>3 · Ficha de atención</h3>
+    <p>Cada caso exige una <b>ficha estructurada</b> diferenciada por tipo de profesional (psicosocial y jurídico): consentimientos, evaluación inicial, tipo de intervención estandarizada, plan de acción con número de sesiones y registro de sesiones. <b>El sistema impide avanzar de etapa si la ficha obligatoria está incompleta.</b></p>
+    <h3>4 · Sesiones y seguimiento</h3>
+    <p>Registra cada contacto en la pestaña <b>Sesiones</b> (realizada, visita fallida, reagendada). Los casos sin actualización por más de ${DIAS_SIN_ACTUALIZAR} días generan alerta automática.</p>
+    <h3>5 · Derivaciones</h3>
+    <p>Desde la pestaña <b>Derivaciones</b> del caso: elige institución (CAJ, CAVD, salud, SENDA, etc.) y motivo. Se emite un folio con trazabilidad institucional. Marca la derivación como <b>Concretada</b> al confirmar la recepción; las no concretadas generan alerta.</p>
+    <h3>6 · Egreso</h3>
+    <p>Cuatro categorías: derivación efectiva, cumplimiento del plan con cierre técnico, egreso voluntario y egreso administrativo. En todos los casos se registra el tipo, se emite <b>informe interno de cierre</b> y —cuando es viable— se aplica la <b>encuesta de satisfacción</b> (escala 1 a 7).</p>
+    <h3>7 · Trabajo sin conexión (modo offline)</h3>
+    <p>Si pierdes señal en terreno, sigue trabajando: los registros se guardan en el dispositivo y el indicador superior muestra los pendientes. Al recuperar conexión, la plataforma <b>sincroniza automáticamente</b>.</p>
+    <h3>8 · Perfiles y confidencialidad</h3>
+    <ul>
+      <li><b>Profesional:</b> ingresa casos, registra intervenciones, ve solo sus comunas asignadas y recibe alertas de sus casos.</li>
+      <li><b>Coordinador/a:</b> además registra brechas, ve todos los casos e indicadores de sus comunas, panel y tablero de su zona.</li>
+      <li><b>Secretaría Ejecutiva:</b> acceso total, asignación de comunas, reportes y administración.</li>
+    </ul>
+    <p>Los datos de las personas usuarias son <b>sensibles</b>: no compartas capturas ni exportaciones fuera de los canales institucionales. Todos los accesos quedan registrados.</p>
+    <h3>9 · Soporte</h3>
+    <p>Mesa de ayuda del proveedor: <code>soporte@plataforma-ec.cl</code> · Lun–Vie 08:00–19:00. Incidencias críticas 24/7, con resolución comprometida dentro de 48 h (SLA de las bases).</p>
+  </div>`;
+}
+
+/* ==================== PWA: manifest + service worker (solo en despliegue http/https) ==================== */
+if(location.protocol === "https:" || location.protocol === "http:"){
+  try{
+    const l = document.createElement("link"); l.rel = "manifest"; l.href = "manifest.json"; document.head.appendChild(l);
+    if("serviceWorker" in navigator) addEventListener("load", ()=> navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+  }catch(e){}
+}
+
+/* ==================== ARRANQUE ==================== */
+seedDatos();
+logAcceso(null, "Inicio de plataforma", "Datos de demostración cargados ("+DB.casos.length+" casos)");
+renderLogin();
+</script>
+</body>
+</html>
