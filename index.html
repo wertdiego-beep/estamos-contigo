@@ -596,7 +596,7 @@ function seedDatos(){
       fechaDelito: fDelito, fechaDerivacion: fDeriv,
       canal: pick(CANALES),
       triage: rng()<0.16 ? "Urgencia" : (rng()<0.5 ? "Moderado" : "Leve"),
-      responsable: prof.id, comunaEquipo: comuna,
+      responsable: null, comunaEquipo: comuna,
       estado:"derivado", historial:[], creado:fDeriv, actualizado:fDeriv,
       fichas:{psicosocial:null, juridico:null},
       sesiones:[], derivaciones:[], brechas:[],
@@ -615,6 +615,7 @@ function seedDatos(){
       const hIng = c.prioridad.nivel==="Alta" ? rint(4,40) : rint(10,110);
       if(avanza("ingresado", hIng, pnom, "Primer contacto realizado")){
         c.consent1Contacto = true;
+        c.responsable = prof.id;
         c.primeraAtencion = new Date(+cursor);
         if(haceDias >= 3 && prog > 0.16 && avanza("atencion", rint(24,96), pnom, "Inicio plan de intervención")){
           c.consent1Visita = rng() < 0.9;
@@ -647,6 +648,13 @@ function seedDatos(){
     c.codigo = nuevoCodigo(c.fechaDerivacion);
     DB.casos.push(c);
   }
+  /* garantiza casos en bandeja (derivados sin responsable) en las comunas de la triada demo */
+  const zonaDemo = ["La Pintana","San Ramón","La Granja"];
+  let enZona = DB.casos.filter(c=>c.estado==="derivado" && zonaDemo.includes(c.comuna)).length;
+  for(const c of DB.casos){
+    if(enZona>=3) break;
+    if(c.estado==="derivado" && !zonaDemo.includes(c.comuna)){ c.comuna = zonaDemo[enZona%3]; enZona++; }
+  }
   DB.casos.sort((a,b)=> b.fechaDerivacion - a.fechaDerivacion);
 }
 function fichaDemo(tipo, prof, base){
@@ -673,7 +681,9 @@ function casosPropios(u=S.user){ return u.rol==="profesional" ? DB.casos.filter(
 /* ==================== ALERTAS AUTOMÁTICAS (punto 2.5 BT) ==================== */
 function calcAlertas(u=S.user){
   const out = []; const ahora = hoy();
-  const cs = casosVisibles(u);
+  /* punto 2.4: el Profesional recibe alertas de SUS casos; coordinación y secretaría, de sus comunas */
+  let cs = casosVisibles(u);
+  if(u && u.rol==="profesional") cs = cs.filter(c => c.responsable===u.id);
   for(const c of cs){
     const hrsDeriv = (ahora - c.fechaDerivacion)/36e5;
     /* a) gestión */
@@ -981,7 +991,7 @@ function renderLogin(){
   });
   $("#lg-btn").onclick = ()=>{
     const u = USUARIOS_SISTEMA.find(x=>x.id===sel); if(!u) return;
-    S.user = u; S.vista = "dashboard"; S.casoAbierto = null; S.filtros = {};
+    S.user = u; S.vista = u.rol==="profesional" ? "inicio" : "dashboard"; S.casoAbierto = null; S.filtros = {};
     logAcceso(u, "Inicio de sesión", "Autenticación correcta desde dispositivo móvil (demo)");
     renderApp();
   };
@@ -1003,16 +1013,21 @@ function renderApp(){
   const app = $("#app"); app.classList.add("on");
   const alertas = calcAlertas();
   const nCrit = alertas.filter(a=>a.sev==="critical").length;
+  /* Matriz de permisos estricta — punto 2.4 Bases Técnicas:
+     Profesional: ingreso de casos · registro de intervenciones · casos de sus comunas · edición de sus casos · alertas de SUS casos.
+     Coordinador/a: + brechas · todos los casos de sus comunas · indicadores del equipo · panel, tablero y datos de sus comunas. (Sin reportes: eso es de Secretaría.)
+     Secretaría Ejecutiva: + asignación de comunas · acceso total · generación de reportes · carga masiva. */
   const items = [
-    ["dashboard","Dashboard de gestión",I.dash, null, true],
+    ["inicio","Mis casos",I.dash, null, u.rol==="profesional"],
+    ["dashboard","Panel de visualización",I.dash, null, u.rol!=="profesional"],
     ["casos","Casos",I.casos, null, true],
     ["nuevo","Ingresar caso",I.nuevo, null, true],
-    ["carga","Carga masiva",I.carga, null, u.rol!=="profesional"],
+    ["carga","Carga masiva",I.carga, null, u.rol==="secretaria"],
     ["alertas","Alertas",I.alerta, alertas.length, true],
-    ["derivaciones","Derivaciones",I.deriv, null, true],
-    ["reportes","Reportes mensuales",I.rep, null, u.rol!=="profesional"],
+    ["derivaciones","Derivaciones",I.deriv, null, u.rol!=="profesional"],
+    ["reportes","Reportes mensuales",I.rep, null, u.rol==="secretaria"],
     ["tablero","Tablero ejecutivo",I.tablero, null, u.rol!=="profesional"],
-    ["viz","Visualización territorial",I.viz, null, u.rol!=="profesional"],
+    ["viz","Visualización de datos",I.viz, null, u.rol!=="profesional"],
     ["admin","Administración",I.admin, null, u.rol==="secretaria"],
     ["manual","Manual de uso",I.manual, null, true],
   ];
@@ -1020,10 +1035,10 @@ function renderApp(){
   <nav class="sidebar" aria-label="Navegación principal">
     <div class="side-brand"><span class="crest">EC</span><div><b>Estamos Contigo</b><span>GORE R.M. · Defensoría a Víctimas</span></div></div>
     <div class="nav-sec">Operación</div>
-    ${items.slice(0,6).filter(i=>i[4]).map(i=>navItem(i)).join("")}
-    <div class="nav-sec">Análisis y monitoreo</div>
-    ${items.slice(6,9).filter(i=>i[4]).map(i=>navItem(i)).join("")}
-    ${items.slice(9).some(i=>i[4]) ? `<div class="nav-sec">Sistema</div>` + items.slice(9).filter(i=>i[4]).map(i=>navItem(i)).join("") : ""}
+    ${items.slice(0,7).filter(i=>i[4]).map(i=>navItem(i)).join("")}
+    ${items.slice(7,10).some(i=>i[4]) ? `<div class="nav-sec">Análisis y monitoreo</div>` + items.slice(7,10).filter(i=>i[4]).map(i=>navItem(i)).join("") : ""}
+    <div class="nav-sec">Sistema</div>
+    ${items.slice(10).filter(i=>i[4]).map(i=>navItem(i)).join("")}
     <div class="side-user">
       <span class="avatar" style="background:${u.color}">${u.ini}</span>
       <div style="min-width:0"><b>${esc(u.nombre)}</b><span>${ROLES[u.rol].n}</span></div>
@@ -1049,8 +1064,11 @@ function renderApp(){
   setConn(!S.offline);
   wireSearch();
   const cont = $("#content");
-  const vistas = {dashboard:vDashboard, casos:vCasos, nuevo:vNuevoCaso, carga:vCarga, alertas:vAlertas, derivaciones:vDerivaciones, reportes:vReportes, tablero:vTablero, viz:vViz, admin:vAdmin, manual:vManual, detalle:vDetalle};
-  (vistas[S.vista]||vDashboard)(cont);
+  /* control central de permisos por vista (punto 2.4 BT) */
+  const permisos = {inicio:["profesional"], dashboard:["coordinador","secretaria"], carga:["secretaria"], derivaciones:["coordinador","secretaria"], reportes:["secretaria"], tablero:["coordinador","secretaria"], viz:["coordinador","secretaria"], admin:["secretaria"]};
+  if(permisos[S.vista] && !permisos[S.vista].includes(u.rol)) S.vista = u.rol==="profesional" ? "inicio" : "dashboard";
+  const vistas = {inicio:vInicio, dashboard:vDashboard, casos:vCasos, nuevo:vNuevoCaso, carga:vCarga, alertas:vAlertas, derivaciones:vDerivaciones, reportes:vReportes, tablero:vTablero, viz:vViz, admin:vAdmin, manual:vManual, detalle:vDetalle};
+  (vistas[S.vista] || (u.rol==="profesional"?vInicio:vDashboard))(cont);
 }
 function navItem([id,n,ico,badge]){
   return `<button class="nav-item ${S.vista===id?"active":""}" onclick="nav('${id}')">${ico}<span>${n}</span>${badge?`<span class="nav-badge">${badge}</span>`:""}</button>`;
@@ -1133,7 +1151,7 @@ function vDashboard(el){
   el.innerHTML = `
   <div class="page-head">
     <div><h2>Dashboard de gestión</h2><p class="pg-sub">${u.rol==="secretaria" ? "36 comunas priorizadas · Región Metropolitana" : "Comunas asignadas: "+comunasDe(u).join(", ")}</p></div>
-    <div class="actions"><button class="btn btn-secondary" onclick="nav('reportes')">${I.rep} Reporte mensual</button><button class="btn btn-primary" onclick="nav('nuevo')">${I.nuevo} Ingresar caso</button></div>
+    <div class="actions">${u.rol==="secretaria" ? `<button class="btn btn-secondary" onclick="nav('reportes')">${I.rep} Reporte mensual</button>` : ""}<button class="btn btn-primary" onclick="nav('nuevo')">${I.nuevo} Ingresar caso</button></div>
   </div>
 
   <div class="grid g-4" style="margin-bottom:16px">
@@ -1229,6 +1247,67 @@ function cumplimientoEstandar(cs){
   return pct(con.filter(c=> (c.primeraAtencion - c.fechaDerivacion)/36e5 <= ESTANDAR_PRIMERA_ATENCION_HRS).length, con.length);
 }
 
+/* ==================== VISTA: MIS CASOS (inicio del perfil Profesional) ====================
+   Funciones exactas del punto 2.4.a BT: ingreso de casos · registro de intervenciones ·
+   acceso restringido a sus comunas · edición de casos bajo su responsabilidad · alertas de sus casos */
+function vInicio(el){
+  const u = S.user;
+  const visibles = casosVisibles(u);
+  const mios = visibles.filter(c=>c.responsable===u.id);
+  const activos = mios.filter(c=>!["cerrado","egreso_adm"].includes(c.estado));
+  const bandeja = visibles.filter(c=>c.estado==="derivado" && c.responsable!==u.id).sort((a,b)=> b.prioridad.pts - a.prioridad.pts);
+  const alertas = calcAlertas(u);
+  const mesAct = mesKey(hoy());
+  const sesionesMes = mios.flatMap(c=>c.sesiones).filter(s=> s.profesional===u.nombre || mesKey(s.t)===mesAct).filter(s=>mesKey(s.t)===mesAct).length;
+  el.innerHTML = `
+  <div class="page-head">
+    <div><h2>Mis casos</h2><p class="pg-sub">Comunas asignadas: ${comunasDe(u).join(", ")} · solo ves y editas lo que te corresponde (punto 2.4 BT)</p></div>
+    <div class="actions"><button class="btn btn-primary" onclick="nav('nuevo')">${I.nuevo} Ingresar caso</button></div>
+  </div>
+  <div class="grid g-4" style="margin-bottom:16px">
+    <div class="card stat-tile"><span class="st-label">Casos bajo mi responsabilidad</span><span class="st-value">${fmtN(activos.length)}</span><span class="st-foot">${fmtN(mios.length-activos.length)} egresados</span></div>
+    <div class="card stat-tile"><span class="st-label">Bandeja de mis comunas</span><span class="st-value">${fmtN(bandeja.length)}</span><span class="st-foot">Derivados sin responsable asignado</span></div>
+    <div class="card stat-tile"><span class="st-label">Alertas de mis casos</span><span class="st-value" style="color:${alertas.length?"var(--critical)":"var(--good-text)"}">${fmtN(alertas.length)}</span><span class="st-foot">${alertas.filter(a=>a.sev==="critical").length} críticas</span></div>
+    <div class="card stat-tile"><span class="st-label">Sesiones registradas este mes</span><span class="st-value">${fmtN(sesionesMes)}</span><span class="st-foot">${cap(fmes(hoy()))}</span></div>
+  </div>
+  <div class="grid g-2" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-pad" style="padding-bottom:8px"><h3>Bandeja — casos derivados de mis comunas</h3><div class="card-sub" style="margin:0">Ordenados por índice de priorización · toma el caso para asumir la responsabilidad</div></div>
+      ${bandeja.length ? `<div class="table-scroll"><table class="dt"><thead><tr><th>Código</th><th>Persona</th><th>Comuna</th><th>Prioridad</th><th>Esperando</th><th></th></tr></thead><tbody>
+        ${bandeja.slice(0,8).map(c=>{
+          const hrs = Math.floor((hoy()-c.fechaDerivacion)/36e5);
+          return `<tr>
+            <td style="font-variant-numeric:tabular-nums"><b>${c.codigo}</b></td>
+            <td><span class="td-main">${esc(c.nombre)}</span><br><span class="td-sub">${esc(DELITOS.find(d=>d.id===c.delito).n)}</span></td>
+            <td>${esc(c.comuna)}</td>
+            <td>${prioChip(c.prioridad)}</td>
+            <td>${hrs>48?`<span class="chip" style="color:var(--critical);background:color-mix(in srgb,var(--critical) 10%,transparent);border-color:transparent">${hrs} h</span>`:`<span class="chip chip-outline">${hrs} h</span>`}</td>
+            <td><button class="btn btn-primary" style="padding:6px 13px" onclick="tomaCaso('${c.id}')">Tomar caso</button></td>
+          </tr>`;}).join("")}
+      </tbody></table></div>` : `<div class="empty"><b>Bandeja al día</b>No hay casos derivados esperando en tus comunas.</div>`}
+    </div>
+    <div class="card">
+      <div class="card-pad" style="padding-bottom:8px; display:flex; align-items:center"><div><h3>Alertas de mis casos</h3><div class="card-sub" style="margin:0">Solo de casos bajo tu responsabilidad</div></div><button class="btn btn-ghost" style="margin-left:auto" onclick="nav('alertas')">Ver todas →</button></div>
+      ${alertas.length ? alertas.slice(0,4).map(a=>alertaHtml(a)).join("") : `<div class="empty"><b>Sin alertas</b>Tus casos están al día.</div>`}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-pad" style="padding-bottom:8px"><h3>Casos bajo mi responsabilidad</h3><div class="card-sub" style="margin:0">Visualización y edición — los demás casos de tus comunas los ves desde "Casos"</div></div>
+    ${activos.length ? `<div class="table-scroll"><table class="dt"><thead><tr><th>Código</th><th>Persona</th><th>Comuna</th><th>Estado</th><th>Prioridad</th><th>Últ. actualización</th></tr></thead><tbody>
+      ${activos.slice(0,12).map(c=>`<tr class="rowlink" onclick="abreCaso('${c.id}')"><td style="font-variant-numeric:tabular-nums"><b>${c.codigo}</b></td><td><span class="td-main">${esc(c.nombre)}</span></td><td>${esc(c.comuna)}</td><td>${estadoChip(c.estado)}</td><td>${prioChip(c.prioridad)}</td><td class="num">${fdate(c.actualizado)}</td></tr>`).join("")}
+    </tbody></table></div>` : `<div class="empty"><b>Aún no tienes casos asignados</b>Toma un caso de la bandeja o ingresa uno nuevo.</div>`}
+  </div>`;
+}
+function tomaCaso(id){
+  const c = DB.casos.find(x=>x.id===id); if(!c) return;
+  c.responsable = S.user.id; c.actualizado = new Date();
+  c.historial.push({estado:c.estado, t:new Date(), por:S.user.nombre, nota:"Caso tomado desde la bandeja — responsable asignado"});
+  logAcceso(S.user, "Toma de caso", c.codigo);
+  registraOperacion("Toma "+c.codigo);
+  toast("Caso "+c.codigo+" asignado a ti", "Registra el primer contacto y el consentimiento para ingresarlo.");
+  abreCaso(id);
+}
+
 /* ==================== VISTA: LISTADO DE CASOS ==================== */
 function vCasos(el){
   const u = S.user;
@@ -1242,7 +1321,7 @@ function vCasos(el){
   el.innerHTML = `
   <div class="page-head">
     <div><h2>Casos</h2><p class="pg-sub">${u.rol==="profesional" ? "Casos de tus comunas asignadas y bajo tu responsabilidad" : u.rol==="coordinador" ? "Todos los casos de tus comunas asignadas" : "Todos los casos del programa"}</p></div>
-    <div class="actions"><button class="btn btn-secondary" onclick="exportaCasos()">${I.descarga} Exportar Excel</button><button class="btn btn-primary" onclick="nav('nuevo')">${I.nuevo} Ingresar caso</button></div>
+    <div class="actions">${u.rol==="secretaria" ? `<button class="btn btn-secondary" onclick="exportaCasos()">${I.descarga} Exportar Excel</button>` : ""}<button class="btn btn-primary" onclick="nav('nuevo')">${I.nuevo} Ingresar caso</button></div>
   </div>
   <div class="card">
     <div class="card-pad" style="padding-bottom:0">
@@ -1286,7 +1365,7 @@ function vNuevoCaso(el){
   el.innerHTML = `
   <div class="page-head">
     <div><h2>Ingreso de caso</h2><p class="pg-sub">Registro único de personas usuarias — genera código de caso e índice de priorización automático</p></div>
-    <div class="actions"><button class="btn btn-secondary" onclick="nav('carga')" ${u.rol==="profesional"?"disabled title='Disponible para coordinación y equipo central'":""}>${I.carga} Carga masiva</button></div>
+    <div class="actions">${u.rol==="secretaria" ? `<button class="btn btn-secondary" onclick="nav('carga')">${I.carga} Carga masiva</button>` : ""}</div>
   </div>
   <form id="form-caso" novalidate>
   <div class="grid g-2-1">
@@ -1410,7 +1489,9 @@ function vDetalle(el){
   const c = DB.casos.find(x=>x.id===S.casoAbierto);
   if(!c){ nav("casos"); return; }
   const u = S.user;
-  const puedeEditar = u.rol!=="profesional" || c.responsable===u.id || comunasDe(u).includes(c.comuna);
+  /* punto 2.4: el Profesional solo edita casos bajo su responsabilidad; el resto de sus comunas los ve */
+  const puedeEditar = u.rol==="profesional" ? c.responsable===u.id : comunasDe(u).includes(c.comuna);
+  const puedeTomar = u.rol==="profesional" && c.responsable!==u.id && comunasDe(u).includes(c.comuna) && !["cerrado","egreso_adm"].includes(c.estado);
   const tab = S.tabDetalle || "resumen";
   const est = ESTADOS.find(e=>e.id===c.estado);
   el.innerHTML = `
@@ -1421,10 +1502,11 @@ function vDetalle(el){
         ${estadoChip(c.estado)} ${prioChip(c.prioridad)}
         ${c.triage==="Urgencia"?`<span class="chip" style="background:color-mix(in srgb,var(--critical) 12%,transparent);color:var(--critical);border-color:color-mix(in srgb,var(--critical) 30%,transparent)">⚠ Triage: urgencia</span>`:""}
       </div>
-      <p class="pg-sub">${esc(c.nombre)} · ${esc(c.comuna)} · ${esc(DELITOS.find(d=>d.id===c.delito).n)} · Responsable: ${esc(USUARIOS_SISTEMA.find(x=>x.id===c.responsable)?.nombre || "Triada móvil")}</p>
+      <p class="pg-sub">${esc(c.nombre)} · ${esc(c.comuna)} · ${esc(DELITOS.find(d=>d.id===c.delito).n)} · Responsable: ${esc(USUARIOS_SISTEMA.find(x=>x.id===c.responsable)?.nombre || "Sin asignar — en bandeja")}</p>
     </div>
     <div class="actions">
       <button class="btn btn-secondary" onclick="nav('casos')">← Volver</button>
+      ${puedeTomar ? `<button class="btn btn-primary" onclick="tomaCaso('${c.id}')">Tomar caso</button>` : ""}
       ${puedeEditar && !["cerrado","egreso_adm"].includes(c.estado) ? `<button class="btn btn-secondary" onclick="modalEstado('${c.id}')">Cambiar estado</button><button class="btn btn-primary" onclick="modalEgreso('${c.id}')">Registrar egreso</button>` : ""}
       ${["cerrado","egreso_adm"].includes(c.estado) ? `<button class="btn btn-secondary" onclick="reingresa('${c.id}')">Registrar reingreso</button>` : ""}
     </div>
