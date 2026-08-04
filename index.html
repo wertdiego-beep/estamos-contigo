@@ -513,11 +513,26 @@ const TRIADAS = Array.from({length:17},(_,i)=>{
   return {id:i+1, n:"Triada móvil "+(i+1), comunas: comunas.length?comunas:[COMUNAS[i%36]]};
 });
 const USUARIOS_SISTEMA = [
-  {id:"u1", nombre:"Camila Torres A.",  rol:"profesional", cargo:"Psicóloga · Triada móvil 5",   perfil:"psicosocial", comunas:["La Pintana","San Ramón","La Granja"], color:"#2a78d6", ini:"CT"},
-  {id:"u2", nombre:"Andrés Fuentes M.", rol:"profesional", cargo:"Abogado · Triada móvil 5",     perfil:"juridico",    comunas:["La Pintana","San Ramón","La Granja"], color:"#4a3aa7", ini:"AF"},
-  {id:"u3", nombre:"Rodrigo Salas P.",  rol:"coordinador", cargo:"Zona Sur · 8 comunas", perfil:"coordinacion", comunas:["La Pintana","San Ramón","La Granja","El Bosque","San Bernardo","Puente Alto","La Cisterna","Lo Espejo"], color:"#eb6834", ini:"RS"},
-  {id:"u4", nombre:"Daniela Vega L.",   rol:"secretaria",  cargo:"Equipo central del programa", perfil:"central", comunas:COMUNAS, color:"#008300", ini:"DV"},
+  {id:"u1", nombre:"Camila Torres A.",  rol:"profesional", cargo:"Psicóloga · Triada móvil 5",   perfil:"psicosocial", comunas:["La Pintana","San Ramón","La Granja"], color:"#2a78d6", ini:"CT", login:true,  activo:true},
+  {id:"u2", nombre:"Andrés Fuentes M.", rol:"profesional", cargo:"Abogado · Triada móvil 5",     perfil:"juridico",    comunas:["La Pintana","San Ramón","La Granja"], color:"#4a3aa7", ini:"AF", login:false, activo:true},
+  {id:"u3", nombre:"Rodrigo Salas P.",  rol:"coordinador", cargo:"Zona Sur · 8 comunas", perfil:"coordinacion", comunas:["La Pintana","San Ramón","La Granja","El Bosque","San Bernardo","Puente Alto","La Cisterna","Lo Espejo"], color:"#eb6834", ini:"RS", login:true, activo:true},
+  {id:"u4", nombre:"Daniela Vega L.",   rol:"secretaria",  cargo:"Equipo central del programa", perfil:"central", comunas:COMUNAS, color:"#008300", ini:"DV", login:true, activo:true},
 ];
+function inicialesDe(nombre){ return nombre.trim().split(/\s+/).slice(0,2).map(p=>p[0]).join("").toUpperCase(); }
+const COLORES_USUARIO = ["#2a78d6","#eb6834","#1baf7a","#eda100","#e87ba4","#4a3aa7","#e34948","#008300"];
+function creaUsuario({nombre, rol, perfil, cargo, comunas}){
+  const id = "u" + (USUARIOS_SISTEMA.length + 1) + Date.now().toString(36).slice(-3);
+  const u = {
+    id, nombre: nombre.trim(), rol,
+    perfil: perfil || (rol==="coordinador" ? "coordinacion" : rol==="secretaria" ? "central" : "psicosocial"),
+    cargo: cargo || (rol==="profesional" ? (perfil==="juridico"?"Abogado/a":"Profesional psicosocial") : rol==="coordinador" ? "Coordinación institucional" : "Equipo central"),
+    comunas: rol==="secretaria" ? COMUNAS : (comunas || []),
+    color: COLORES_USUARIO[USUARIOS_SISTEMA.length % COLORES_USUARIO.length],
+    ini: inicialesDe(nombre), login:true, activo:true,
+  };
+  USUARIOS_SISTEMA.push(u);
+  return u;
+}
 const ROLES = {
   profesional:{n:"Profesional", desc:"Ingreso de casos · registro de intervenciones · alertas de sus casos · acceso restringido a sus comunas asignadas"},
   coordinador:{n:"Coordinador/a institucional", desc:"Todos los casos de sus comunas · brechas · indicadores del equipo · panel y tablero de sus comunas"},
@@ -966,13 +981,13 @@ function renderLogin(){
       <h2>Iniciar sesión</h2>
       <p>Selecciona un perfil de demostración para ingresar.</p>
       <div class="role-cards" role="radiogroup" aria-label="Perfil de acceso">
-        ${USUARIOS_SISTEMA.filter(u=>["u1","u3","u4"].includes(u.id)).map(u=>`
-          <button class="role-card" data-user="${u.id}" aria-pressed="false">
+        ${USUARIOS_SISTEMA.filter(u=>u.login).map(u=>`
+          <button class="role-card" data-user="${u.id}" aria-pressed="false" ${u.activo?"":"disabled style='opacity:.5'"}>
             <span class="avatar" style="background:${u.color}">${u.ini}</span>
             <span style="min-width:0">
-              <span class="rc-name">${esc(u.nombre)}</span><br>
+              <span class="rc-name">${esc(u.nombre)}${u.activo?"":" · 🔒 bloqueado"}</span><br>
               <span class="rc-role">${ROLES[u.rol].n} — ${esc(u.cargo)}</span><br>
-              <span class="rc-scope">${u.rol==="secretaria" ? "Acceso a las 36 comunas priorizadas" : "Comunas: "+u.comunas.slice(0,3).join(", ")+(u.comunas.length>3?" +"+(u.comunas.length-3):"")}</span>
+              <span class="rc-scope">${u.rol==="secretaria" ? "Acceso a las 36 comunas priorizadas" : "Comunas: "+(u.comunas.slice(0,3).join(", ")||"sin asignar")+(u.comunas.length>3?" +"+(u.comunas.length-3):"")}</span>
             </span>
           </button>`).join("")}
       </div>
@@ -2242,31 +2257,40 @@ function vAdmin(el){
   const body = $("#admin-body");
   if(tab==="usuarios"){
     body.innerHTML = `
+    <div class="banner info"><div><b>Gestión de usuarios — función de la Secretaría Ejecutiva</b><span>El alta inicial masiva de los 60 profesionales la realiza el proveedor en la implementación (nómina del GORE); desde entonces la administración permanente queda aquí, con cada acción auditada en el registro de accesos.</span></div></div>
     <div class="card">
+      <div class="card-pad" style="display:flex; align-items:center; gap:9px; padding-bottom:10px; flex-wrap:wrap">
+        <div><h3>Usuarios y perfiles (${USUARIOS_SISTEMA.length})</h3><div class="card-sub" style="margin:0">${USUARIOS_SISTEMA.filter(x=>x.activo).length} activos · ${USUARIOS_SISTEMA.filter(x=>!x.activo).length} bloqueados</div></div>
+        <span class="spacer" style="flex:1"></span>
+        <button class="btn btn-secondary" onclick="$('#nomina-file').click()">${I.carga} Cargar nómina (CSV)</button>
+        <input type="file" id="nomina-file" accept=".csv" style="display:none" onchange="importaNomina(this.files[0])">
+        <button class="btn btn-primary" onclick="modalUsuario()">${I.nuevo} Agregar usuario</button>
+      </div>
       <div class="table-scroll"><table class="dt">
-        <thead><tr><th>Usuario</th><th>Perfil de acceso</th><th>Ámbito</th><th>Comunas asignadas</th><th>Estado</th></tr></thead>
+        <thead><tr><th>Usuario</th><th>Perfil de acceso</th><th>Comunas asignadas</th><th>Acceso</th><th>Estado</th><th></th></tr></thead>
         <tbody>${USUARIOS_SISTEMA.map(x=>`<tr>
           <td><div style="display:flex; gap:10px; align-items:center"><span class="avatar" style="width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:12px;background:${x.color}">${x.ini}</span><div><span class="td-main">${esc(x.nombre)}</span><br><span class="td-sub">${esc(x.cargo)}</span></div></div></td>
-          <td>${ROLES[x.rol].n}</td>
-          <td style="color:var(--ink-2); max-width:300px; font-size:12px">${ROLES[x.rol].desc}</td>
-          <td style="font-size:12px">${x.rol==="secretaria"?"Las 36 comunas":x.comunas.join(", ")}</td>
-          <td><span class="chip" style="color:var(--good-text);background:color-mix(in srgb,var(--good) 12%,transparent);border-color:transparent">Activo</span></td>
+          <td>${ROLES[x.rol].n}${x.rol==="profesional"?`<br><span class="td-sub">${x.perfil==="juridico"?"Disciplina jurídica":"Disciplina psicosocial"}</span>`:""}</td>
+          <td style="font-size:12px; max-width:260px">${x.rol==="secretaria"?"Las 36 comunas":(x.comunas.join(", ")||"<i style='color:var(--ink-3)'>Sin asignar</i>")}</td>
+          <td style="font-size:12px; color:var(--ink-2)">${x.login?"Con acceso":"Sin acceso directo"}</td>
+          <td>${x.activo?`<span class="chip" style="color:var(--good-text);background:color-mix(in srgb,var(--good) 12%,transparent);border-color:transparent">Activo</span>`:`<span class="chip" style="color:var(--critical);background:color-mix(in srgb,var(--critical) 10%,transparent);border-color:transparent">🔒 Bloqueado</span>`}</td>
+          <td style="white-space:nowrap"><button class="btn btn-ghost" onclick="modalUsuario('${x.id}')">Editar</button>${x.id!==S.user.id?`<button class="btn btn-ghost" style="color:${x.activo?"var(--critical)":"var(--good-text)"}" onclick="toggleBloqueoUsuario('${x.id}')">${x.activo?"Bloquear":"Activar"}</button>`:""}</td>
         </tr>`).join("")}</tbody>
       </table></div>
     </div>
-    <p class="hint" style="margin-top:12px">${I.shield} Perfiles según punto 2.4 de las Bases Técnicas: Profesional, Coordinador/a institucional y Secretaría Ejecutiva, con control de permisos por rol y autenticación segura. En producción: alta/baja de usuarios, doble factor y política de contraseñas institucional.</p>`;
+    <p class="hint" style="margin-top:12px">${I.shield} Formato de la nómina CSV: <code>nombre;rol;disciplina;comunas</code> (rol: profesional / coordinador / secretaria · disciplina: psicosocial / juridico · comunas separadas por coma). Los usuarios creados aparecen de inmediato en la pantalla de inicio de sesión con su perfil y restricciones.</p>`;
   } else if(tab==="comunas"){
     body.innerHTML = `
     <div class="banner info"><div><b>Asignación de comunas a supervisores y equipos</b><span>Determina qué casos ve cada triada y coordinación. Los cambios rigen de inmediato y quedan auditados.</span></div></div>
     <div class="card">
       <div class="table-scroll"><table class="dt">
         <thead><tr><th>Equipo</th><th>Comunas asignadas</th><th class="num">Casos activos</th><th></th></tr></thead>
-        <tbody>${TRIADAS.slice(0,9).map(t=>{
+        <tbody>${TRIADAS.map(t=>{
           const n = DB.casos.filter(c=> t.comunas.includes(c.comuna) && !["cerrado","egreso_adm"].includes(c.estado)).length;
           return `<tr><td><span class="td-main">${esc(t.n)}</span><br><span class="td-sub">3 profesionales (psicosocial · jurídico · gestor)</span></td>
-          <td>${t.comunas.map(c=>`<span class="chip chip-outline" style="margin:1px 3px 1px 0">${esc(c)}</span>`).join("")}</td>
+          <td>${t.comunas.map(c=>`<span class="chip chip-outline" style="margin:1px 3px 1px 0">${esc(c)}</span>`).join("")||"<i style='color:var(--ink-3)'>Sin comunas</i>"}</td>
           <td class="num"><b>${n}</b></td>
-          <td><button class="btn btn-ghost" onclick="toast('Asignación de comunas','En la versión productiva se abre el editor de asignación con vigencias y respaldo auditado.','info')">Editar</button></td></tr>`;}).join("")}</tbody>
+          <td><button class="btn btn-ghost" onclick="modalTriada(${t.id})">Editar asignación</button></td></tr>`;}).join("")}</tbody>
       </table></div>
     </div>`;
   } else if(tab==="accesos"){
@@ -2304,6 +2328,108 @@ function vAdmin(el){
       </div>
     </div>`;
   }
+}
+
+/* ---------- Gestión de usuarios (Secretaría Ejecutiva · punto 2.4.c + objetivo específico 2) ---------- */
+function pillsComunas(seleccion){
+  return COMUNAS.map(c=>`<label class="checkbox-pill"><input type="checkbox" name="uc" value="${esc(c)}" ${seleccion.includes(c)?"checked":""}><span>${esc(c)}</span></label>`).join("");
+}
+function modalUsuario(id){
+  const u = id ? USUARIOS_SISTEMA.find(x=>x.id===id) : null;
+  abreModal(`
+    <div class="modal-head"><h3>${u?"Editar usuario":"Agregar usuario"}</h3><button class="icon-btn x" aria-label="Cerrar">${I.x}</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field"><label class="req" for="fu-nombre">Nombre completo</label><input id="fu-nombre" value="${esc(u?.nombre||"")}"></div>
+        <div class="field"><label for="fu-cargo">Cargo</label><input id="fu-cargo" value="${esc(u?.cargo||"")}" placeholder="p. ej. Psicóloga · Triada móvil 3"></div>
+        <div class="field"><label class="req" for="fu-rol">Perfil de acceso (punto 2.4 BT)</label>
+          <select id="fu-rol" ${u&&u.id===S.user.id?"disabled":""}>
+            <option value="profesional" ${u?.rol==="profesional"?"selected":""}>a) Profesional</option>
+            <option value="coordinador" ${u?.rol==="coordinador"?"selected":""}>b) Coordinador/a institucional</option>
+            <option value="secretaria" ${u?.rol==="secretaria"?"selected":""}>c) Secretaría Ejecutiva</option>
+          </select></div>
+        <div class="field" id="fu-disc-wrap"><label for="fu-disc">Disciplina (ficha que completa)</label>
+          <select id="fu-disc"><option value="psicosocial" ${u?.perfil==="psicosocial"?"selected":""}>Psicosocial (psicólogo/a · trab. social)</option><option value="juridico" ${u?.perfil==="juridico"?"selected":""}>Jurídica (abogado/a)</option></select></div>
+      </div>
+      <fieldset class="fs" id="fu-comunas-wrap" style="margin-top:12px"><legend>Comunas asignadas</legend>
+        <div class="check-row" style="max-height:180px; overflow-y:auto">${pillsComunas(u?.comunas||[])}</div>
+        <div class="hint">La Secretaría Ejecutiva accede siempre a las 36 comunas; para los demás perfiles, esta selección define qué casos ven.</div>
+      </fieldset>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" onclick="cierraModal()">Cancelar</button><button class="btn btn-primary" id="fu-save">${u?"Guardar cambios":"Crear usuario"}</button></div>`, {size:"lg"});
+  const sync = ()=>{
+    const rol = $("#fu-rol").value;
+    $("#fu-disc-wrap").style.display = rol==="profesional" ? "" : "none";
+    $("#fu-comunas-wrap").style.display = rol==="secretaria" ? "none" : "";
+  };
+  $("#fu-rol").onchange = sync; sync();
+  $("#fu-save").onclick = ()=>{
+    const nombre = $("#fu-nombre").value.trim();
+    if(!nombre){ toast("Falta el nombre","El nombre completo es obligatorio.","err"); return; }
+    const rol = $("#fu-rol").value;
+    const comunas = $$("input[name=uc]:checked").map(x=>x.value);
+    if(rol!=="secretaria" && !comunas.length){ toast("Sin comunas asignadas","Asigna al menos una comuna para este perfil.","err"); return; }
+    if(u){
+      u.nombre = nombre; u.ini = inicialesDe(nombre);
+      u.cargo = $("#fu-cargo").value.trim() || u.cargo;
+      if(u.id!==S.user.id) u.rol = rol;
+      u.perfil = rol==="profesional" ? $("#fu-disc").value : (rol==="coordinador"?"coordinacion":"central");
+      u.comunas = rol==="secretaria" ? COMUNAS : comunas;
+      logAcceso(S.user, "Edición de usuario", nombre+" · "+ROLES[u.rol].n+" · "+(rol==="secretaria"?"36":comunas.length)+" comunas");
+      toast("Usuario actualizado", nombre+" — los cambios de acceso rigen de inmediato.");
+    } else {
+      const nu = creaUsuario({nombre, rol, perfil: rol==="profesional" ? $("#fu-disc").value : null, cargo: $("#fu-cargo").value.trim(), comunas});
+      logAcceso(S.user, "Alta de usuario", nu.nombre+" · "+ROLES[nu.rol].n+" · "+(rol==="secretaria"?"36":comunas.length)+" comunas");
+      toast("Usuario creado: "+nu.nombre, "Ya puede iniciar sesión con el perfil "+ROLES[nu.rol].n+". Aparece en la pantalla de acceso.");
+    }
+    registraOperacion("Gestión de usuario");
+    cierraModal(); renderApp();
+  };
+}
+function toggleBloqueoUsuario(id){
+  const u = USUARIOS_SISTEMA.find(x=>x.id===id); if(!u || u.id===S.user.id) return;
+  u.activo = !u.activo;
+  logAcceso(S.user, u.activo?"Usuario reactivado":"Usuario bloqueado", u.nombre);
+  toast(u.activo?"Usuario reactivado":"Usuario bloqueado", u.nombre + (u.activo?" recupera su acceso.":" no podrá iniciar sesión hasta ser reactivado."), u.activo?"ok":"warn");
+  renderApp();
+}
+async function importaNomina(file){
+  if(!file) return;
+  try{
+    const filas = parseCSV(await file.text());
+    let creados = 0, errores = [];
+    filas.forEach((f,i)=>{
+      const nombre = (f.nombre||"").trim();
+      const rol = (f.rol||"profesional").trim().toLowerCase();
+      if(!nombre){ errores.push("fila "+(i+2)+": sin nombre"); return; }
+      if(!ROLES[rol]){ errores.push("fila "+(i+2)+": rol desconocido '"+rol+"'"); return; }
+      const comunas = (f.comunas||"").split(",").map(x=>x.trim()).map(x=>COMUNAS.find(c=>c.toLowerCase()===x.toLowerCase())).filter(Boolean);
+      if(rol!=="secretaria" && !comunas.length){ errores.push("fila "+(i+2)+": sin comunas válidas"); return; }
+      creaUsuario({nombre, rol, perfil:(f.disciplina||"psicosocial").trim().toLowerCase()==="juridico"?"juridico":"psicosocial", cargo:(f.cargo||"").trim(), comunas});
+      creados++;
+    });
+    logAcceso(S.user, "Carga de nómina", creados+" usuarios creados desde "+file.name+(errores.length?" · "+errores.length+" filas con error":""));
+    toast("Nómina procesada", creados+" usuario(s) creados."+(errores.length?" "+errores.length+" fila(s) con error: "+errores.slice(0,3).join("; ")+(errores.length>3?"…":""):""), errores.length?"warn":"ok");
+    renderApp();
+  } catch(e){ toast("No se pudo leer la nómina", e.message, "err"); }
+}
+function modalTriada(id){
+  const t = TRIADAS.find(x=>x.id===id); if(!t) return;
+  abreModal(`
+    <div class="modal-head"><h3>Asignación de comunas — ${esc(t.n)}</h3><button class="icon-btn x" aria-label="Cerrar">${I.x}</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom:10px">Función exclusiva de la Secretaría Ejecutiva (punto 2.4.c BT): "asignación de comunas a supervisores y equipos". El cambio rige de inmediato y queda auditado.</p>
+      <div class="check-row" style="max-height:220px; overflow-y:auto">${COMUNAS.map(c=>`<label class="checkbox-pill"><input type="checkbox" name="tc" value="${esc(c)}" ${t.comunas.includes(c)?"checked":""}><span>${esc(c)}</span></label>`).join("")}</div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-secondary" onclick="cierraModal()">Cancelar</button><button class="btn btn-primary" id="ft-save">Guardar asignación</button></div>`);
+  $("#ft-save").onclick = ()=>{
+    const sel = $$("input[name=tc]:checked").map(x=>x.value);
+    if(!sel.length){ toast("Sin comunas","Un equipo debe tener al menos una comuna asignada.","err"); return; }
+    t.comunas = sel;
+    logAcceso(S.user, "Asignación de comunas", t.n+" → "+sel.join(", "));
+    registraOperacion("Asignación "+t.n);
+    cierraModal(); toast("Asignación actualizada", t.n+" ahora cubre "+sel.length+" comuna(s)."); renderApp();
+  };
 }
 
 /* ==================== VISTA: MANUAL DE USO ==================== */
