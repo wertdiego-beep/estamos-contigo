@@ -991,7 +991,7 @@ function renderLogin(){
             </span>
           </button>`).join("")}
       </div>
-      <div class="field"><label for="lg-pass">Contraseña</label><input id="lg-pass" type="password" value="demo·2026" autocomplete="current-password"></div>
+      <div class="field"><label for="lg-pass">Contraseña</label><input id="lg-pass" type="password" placeholder="Ingresa la contraseña" autocomplete="current-password"><div id="lg-err" style="display:none;color:#c0392b;font-size:12.5px;margin-top:6px;font-weight:600">Contraseña incorrecta</div></div>
       <button class="btn btn-primary btn-block" id="lg-btn" disabled>Ingresar a la plataforma</button>
       <p class="login-foot">Autenticación de demostración. En producción: credenciales institucionales con MFA / ClaveÚnica,<br>sesiones cifradas (HTTPS/TLS 1.3) y registro de accesos auditable.</p>
     </div>
@@ -1004,8 +1004,17 @@ function renderLogin(){
       sel = b.dataset.user; $("#lg-btn").disabled = false;
     };
   });
-  $("#lg-btn").onclick = ()=>{
+  $("#lg-btn").onclick = async ()=>{
     const u = USUARIOS_SISTEMA.find(x=>x.id===sel); if(!u) return;
+    const pw = ($("#lg-pass").value||"");
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pw));
+    const hex = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+    if(hex !== "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646"){
+      const e = $("#lg-err"); if(e) e.style.display = "block";
+      $("#lg-pass").focus();
+      return;
+    }
+    const eok = $("#lg-err"); if(eok) eok.style.display = "none";
     S.user = u; S.vista = u.rol==="profesional" ? "inicio" : "dashboard"; S.casoAbierto = null; S.filtros = {};
     logAcceso(u, "Inicio de sesión", "Autenticación correcta desde dispositivo móvil (demo)");
     renderApp();
